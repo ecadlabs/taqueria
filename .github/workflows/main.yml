@@ -187,7 +187,7 @@ jobs:
           DENO_DIR: "./deno"
         run: |
           COMMIT=`git rev-parse --short "$GITHUB_SHA"`
-          deno compile --output taq --target $DENO_TARGET --allow-run --allow-write --allow-read --allow-env index.ts --quickstart "`cat quickstart.md`" --setBuild "$TAQ_VERSION/$COMMIT" --setVersion "$TAQ_VERSION"
+          deno compile --output taq --allow-run --allow-write --allow-read --allow-env index.ts --quickstart "`cat quickstart.md`" --setBuild "$TAQ_VERSION/$COMMIT" --setVersion "$TAQ_VERSION"
           [[ $(./taq init -p ./test_project) == "Project taq'ified!" ]] 
           chmod +x taq
           echo "$(pwd)" >> $GITHUB_PATH
