@@ -20,6 +20,7 @@ jobs:
   # This job creates boolean outputs based on path filters. These outputs can then be used as job conditions
   detect-changes:
     runs-on: ubuntu-latest
+    if: ${{ github.repository == 'ecadlabs/taqueria' }}
     outputs:
       vscode: ${{ steps.filter.outputs.vscode }}
     steps:
@@ -35,7 +36,8 @@ jobs:
       contents: 'read'
       id-token: 'write'
     runs-on: ${{ matrix.os }}
-    if: github.event_name != 'release'
+    if: ${{ github.event_name != 'release'
+            github.repository == 'ecadlabs/taqueria' }}
     strategy:
       fail-fast: true
       matrix:
@@ -104,6 +106,7 @@ jobs:
           echo "::set-output name=${{ matrix.os_short }}::https://storage.googleapis.com/taqueria-artifacts/${{ steps.upload-file.outputs.uploaded }}"
 
   publish-protocol-to-npm:
+    if: ${{ github.repository == 'ecadlabs/taqueria' }}
     uses: ./.github/workflows/npm-publish.yml
     with:
       dir: taqueria-protocol
@@ -111,6 +114,7 @@ jobs:
       NPM_TOKEN: ${{ secrets.NPMJS_PAT }}
 
   publish-sdk-to-npm:
+    if: ${{ github.repository == 'ecadlabs/taqueria' }}
     needs: publish-protocol-to-npm
     uses: ./.github/workflows/npm-publish.yml
     with:
@@ -119,6 +123,7 @@ jobs:
       NPM_TOKEN: ${{ secrets.NPMJS_PAT }}
 
   publish-ligo-plugin-to-npm:
+    if: ${{ github.repository == 'ecadlabs/taqueria' }}
     needs: publish-sdk-to-npm
     uses: ./.github/workflows/npm-publish.yml
     with:
@@ -127,6 +132,7 @@ jobs:
       NPM_TOKEN: ${{ secrets.NPMJS_PAT }}
   
   publish-smartpy-plugin-to-npm:
+    if: ${{ github.repository == 'ecadlabs/taqueria' }}
     needs: publish-sdk-to-npm
     uses: ./.github/workflows/npm-publish.yml
     with:
@@ -135,6 +141,7 @@ jobs:
       NPM_TOKEN: ${{ secrets.NPMJS_PAT }}
 
   publish-taquito-plugin-to-npm:
+    if: ${{ github.repository == 'ecadlabs/taqueria' }}
     needs: publish-sdk-to-npm
     uses: ./.github/workflows/npm-publish.yml
     with:
@@ -143,6 +150,7 @@ jobs:
       NPM_TOKEN: ${{ secrets.NPMJS_PAT }}
 
   publish-flextesa-plugin-to-npm:
+    if: ${{ github.repository == 'ecadlabs/taqueria' }}
     needs:
       - publish-sdk-to-npm
     uses: ./.github/workflows/npm-publish.yml
@@ -152,6 +160,7 @@ jobs:
       NPM_TOKEN: ${{ secrets.NPMJS_PAT }}
 
   publish-contract-types-plugin-to-npm:
+    if: ${{ github.repository == 'ecadlabs/taqueria' }}
     needs: publish-sdk-to-npm
     uses: ./.github/workflows/npm-publish.yml
     with:
@@ -174,9 +183,14 @@ jobs:
         with:
           deno-version: "1.18.2"
 
-      - name: get binary and make executable from previous step for tests
+      - name: build binary and make executable
+        env:
+          TAQ_VERSION: ${{ github.ref_name }}
+          DENO_DIR: "./deno"
         run: |
-          wget ${{ needs.build-binaries.outputs.public-url-ubuntu }} -O taq
+          COMMIT=`git rev-parse --short "$GITHUB_SHA"`
+          deno compile --output taq --target $DENO_TARGET --allow-run --allow-write --allow-read --allow-env index.ts --quickstart "`cat quickstart.md`" --setBuild "$TAQ_VERSION/$COMMIT" --setVersion "$TAQ_VERSION"
+          [[ $(./taq init -p ./test_project) == "Project taq'ified!" ]] 
           chmod +x taq
           echo "$(pwd)" >> $GITHUB_PATH
 
@@ -202,7 +216,8 @@ jobs:
     needs: detect-changes
     if: ${{ needs.detect-changes.outputs.vscode == 'true' || 
             github.event_name == 'release' || 
-            startsWith(github.ref, 'refs/tags/v')}}
+            startsWith(github.ref, 'refs/tags/v') 
+            github.repository == 'ecadlabs/taqueria' }}
     uses: ./.github/workflows/vscode-extension.yml
     secrets:
       GCP_PROJECT: ${{ secrets.GCP_PROJECT }}
@@ -214,7 +229,8 @@ jobs:
     # Without the 'always()' expression, the other conditions are not evaluated if a job is skipped or fails.
     if: ${{ always() &&
             !(contains(needs.*.result, 'failure')) && 
-            github.event_name == 'pull_request'}}
+            github.event_name == 'pull_request' &&
+            github.repository == 'ecadlabs/taqueria' }}
     needs: 
       - build-binaries
       - publish-protocol-to-npm
@@ -343,7 +359,8 @@ jobs:
       - publish-flextesa-plugin-to-npm
       - publish-contract-types-plugin-to-npm
       - vscode-extension-workflow
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: ${{ startsWith(github.ref, 'refs/tags/v') &&
+            github.repository == 'ecadlabs/taqueria' }}
     steps:
       - uses: actions/checkout@v2
 
