@@ -212,9 +212,9 @@ jobs:
 
   vscode-extension-workflow:
     needs: detect-changes
-    if: ${{ needs.detect-changes.outputs.vscode == 'true' || 
+    if: ${{ (needs.detect-changes.outputs.vscode == 'true' || 
             github.event_name == 'release' || 
-            startsWith(github.ref, 'refs/tags/v') 
+            startsWith(github.ref, 'refs/tags/v')) &&
             github.repository == 'ecadlabs/taqueria' }}
     uses: ./.github/workflows/vscode-extension.yml
     secrets:
