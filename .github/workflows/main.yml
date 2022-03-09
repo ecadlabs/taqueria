@@ -1,9 +1,7 @@
 name: main
 
 on:
-  pull_request:
-    branches:
-      - main
+  pull_request_target:
 
   push:
     tags:
