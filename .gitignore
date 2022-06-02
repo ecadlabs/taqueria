@@ -156,3 +156,5 @@ tests/coverage
 /taqueria-vscode-extension/config.json
 website/docs/glossary.md
 website/yarn.lock
+taqueria-state-js/index.js
+taqueria-state-js/index.js
