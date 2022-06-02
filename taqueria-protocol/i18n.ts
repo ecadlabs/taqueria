@@ -19,7 +19,7 @@ export default async (): Promise<i18n> => {
 						'appName': 'Taqueria',
 						'appDesc': 'Taqueria is an integrated environment for compiling, testing, and deploying Tezos software.',
 						'versionDesc': 'Display the verison number of the Taqueria program',
-						'betaWarning': "Taqueria is currently in BETA. You've been warned. :)",
+						'betaWarning': "🚧 Taqueria is currently in BETA. You've been warned! 🚧",
 						'configDirDesc': 'Config directory (default ./.taq)',
 						'initDesc': 'Initialize a new project',
 						'initPathDesc': 'Path to your project directory',

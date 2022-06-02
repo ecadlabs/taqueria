@@ -12,7 +12,7 @@ Options:
   -e, --env         Specify an environment configuration
   -y, --yes         Select "yes" to any prompt        [boolean] [default: false]  
 
-Taqueria is currently in BETA. You've been warned. :)
+🚧 Taqueria is currently in BETA. You've been warned! 🚧
 
 Your config.json file is invalid
 `
@@ -35,7 +35,7 @@ Options:
   -e, --env         Specify an environment configuration
       --help        Show help                                     [boolean]
 
-Taqueria is currently in BETA. You've been warned. :)
+🚧 Taqueria is currently in BETA. You've been warned! 🚧
 `
 
 export const helpContentsLigoPlugin: string = `taq <command>
@@ -55,7 +55,7 @@ Options:
   -y, --yes         Select "yes" to any prompt        [boolean] [default: false]
       --help        Show help                                          [boolean]
 
-Taqueria is currently in BETA. You've been warned. :)
+🚧 Taqueria is currently in BETA. You've been warned! 🚧
 `
 
 export const helpContentsLigoPluginSpecific = `taq compile [sourceFile]
@@ -91,7 +91,7 @@ Options:
   -y, --yes         Select "yes" to any prompt        [boolean] [default: false]
       --help        Show help                                          [boolean]
 
-Taqueria is currently in BETA. You've been warned. :)
+🚧 Taqueria is currently in BETA. You've been warned! 🚧
 `
 
 export const helpContentsSmartpyPluginSpecific = `taq compile [sourceFile]
@@ -138,7 +138,7 @@ Options:
   -y, --yes         Select "yes" to any prompt        [boolean] [default: false]
       --help        Show help                                          [boolean]
 
-Taqueria is currently in BETA. You've been warned. :)
+🚧 Taqueria is currently in BETA. You've been warned! 🚧
 `
 
 export const helpContentsLigoSmartpySpecific = `taq compile
@@ -174,7 +174,7 @@ Options:
   -y, --yes         Select "yes" to any prompt        [boolean] [default: false]
       --help        Show help                                          [boolean]
 
-Taqueria is currently in BETA. You've been warned. :)
+🚧 Taqueria is currently in BETA. You've been warned! 🚧
 `
 
 export const helpContentsLigoArchetypeSpecific = `taq compile
@@ -211,7 +211,7 @@ Options:
   -y, --yes         Select "yes" to any prompt        [boolean] [default: false]
       --help        Show help                                          [boolean]
 
-Taqueria is currently in BETA. You've been warned. :)
+🚧 Taqueria is currently in BETA. You've been warned! 🚧
 `
 
 export const helpContentsArchetypePluginSpecific: string = `taq compile [sourceFile]
@@ -244,7 +244,7 @@ Options:
   -y, --yes         Select "yes" to any prompt        [boolean] [default: false]
       --help        Show help                                          [boolean]
 
-Taqueria is currently in BETA. You've been warned. :)
+🚧 Taqueria is currently in BETA. You've been warned! 🚧
 `
 
 export const helpContentsTaquitoPluginSpecific = `taq deploy [contract]
@@ -278,7 +278,7 @@ Options:
   -y, --yes         Select "yes" to any prompt        [boolean] [default: false]
       --help        Show help                                          [boolean]
 
-Taqueria is currently in BETA. You've been warned. :)
+🚧 Taqueria is currently in BETA. You've been warned! 🚧
 `
 
 export const helpContentsFlextesaPluginStartSandbox = `taq start sandbox [sandboxName]
@@ -329,7 +329,7 @@ Options:
   -y, --yes         Select "yes" to any prompt        [boolean] [default: false]
       --help        Show help                                          [boolean]
 
-Taqueria is currently in BETA. You've been warned. :)
+🚧 Taqueria is currently in BETA. You've been warned! 🚧
 `
 
 export const helpContentsGenerateTypesPluginSpecific = `taq generate types [typescriptDir]
