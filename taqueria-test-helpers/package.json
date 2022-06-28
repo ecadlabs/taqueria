@@ -1,0 +1,39 @@
+{
+  "name": "@taqueria/test-helpers",
+  "version": "0.4.0",
+  "description": "A module to provide some utilities to cross-test on Deno and Jest",
+  "targets": {
+    "default": {
+      "source": "./index.ts",
+      "distDir": "./",
+      "context": "node",
+      "isLibrary": true
+    }
+  },
+  "scripts": {
+    "build": "npx tsc -noEmit && npx parcel build --no-cache 2>&1"
+  },
+  "keywords": [
+    "taqueria",
+    "tezos",
+    "build",
+    "ecad",
+    "ecadlabs",
+    "test"
+  ],
+  "author": "ECAD Labs",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ecadlabs/taqueria.git",
+    "directory": "taqueria-plugin-ligo"
+  },
+  "bugs": {
+    "url": "https://github.com/ecadlabs/taqueria/issues"
+  },
+  "homepage": "https://github.com/ecadlabs/taqueria#readme",
+  "devDependencies": {
+    "parcel": "^2.5.0",
+    "typescript": "^4.7.2"
+  }
+}
