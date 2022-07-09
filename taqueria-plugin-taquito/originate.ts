@@ -46,9 +46,10 @@ const addOrigination = (parsedArgs: Opts, batch: Promise<WalletOperationBatch>) 
 	async (mapping: ContractStorageMapping) => {
 		const contractAbspath = getContractAbspath(mapping.filename, parsedArgs);
 		const contractData = await readFile(contractAbspath, 'utf-8');
+		// console.error("JCC storage: ", mapping.storage)
 		return (await batch).withOrigination({
 			code: contractData,
-			storage: mapping.storage,
+			init: mapping.storage as any,
 		});
 	};
 
