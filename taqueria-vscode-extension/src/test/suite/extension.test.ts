@@ -1,32 +1,50 @@
 import assert from 'assert';
+import { exec } from 'child_process';
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { ExtensionContext, Uri } from 'vscode';
+import { CancellationToken, ExtensionContext, QuickPickOptions, Uri, workspace } from 'vscode';
 import * as taqueriaExtension from '../../extension';
 import * as MockedObject from './MockedObject';
 import { sleep } from './utils/utils';
 
+const taqRoot = path.resolve(__dirname, '../../../../../');
 const projectRoot = path.resolve(__dirname, '../../../../');
 const testProjectDestination = `${projectRoot}/out/vscode-taq-test-project`;
 const testProjectSource = `${projectRoot}/src/test/suite/data/vscode-taq-test-project`;
 
-describe('Extension Test Suite', () => {
+const mockedMethods = {
+	'window.showInformationMessage': (msg: string) => Promise.resolve(console.log(msg)),
+	// 'taqueria.install': (msg: string) => Promise.resolve(console.log('Test2')),
+	'window.showQuickPick': (
+		_availablePlugins: readonly string[] | Thenable<readonly string[]>,
+		_options: QuickPickOptions & { canPickMany: true },
+		cancellationToken: CancellationToken,
+	) => Promise.resolve(['@taqueria/plugin-ligo']),
+	// window.showQuickPick(availablePlugins, {
+	// 		canPickMany: false,
+	// 		ignoreFocusOut: false,
+	// 		placeHolder: 'Plugin name',
+	// 		title: 'Select a plugin',
+	// 	});
+};
+
+describe('Extension Test Suite', async () => {
+	let vscodeMock: typeof vscode;
+
 	before(async () => {
+		// await fse.copy(testProjectSource, testProjectDestination);
+		// taqueriaExtension.deactivate();
+		vscodeMock = MockedObject.make(vscode, mockedMethods);
 		const context: ExtensionContext = {
 			subscriptions: [],
 		} as any;
-		await taqueriaExtension.activate(context, {
-			vscode: MockedObject.make(vscode, {
-				'window.showInformationMessage': (msg: string) => Promise.resolve(console.log(msg)),
-			}),
-		});
-		await fse.copy(testProjectSource, testProjectDestination);
+		await taqueriaExtension.activate(context, { vscode: vscodeMock });
 
 		vscode.window.showInformationMessage('Start all tests.');
 	});
 
-	it('Verify that Taqueria Initiate will init new taquifed  project ', async () => {
+	it.skip('Verify that Taqueria Initiate will init new taquifed  project ', async () => {
 		await vscode.commands.getCommands(true).then(allCommands => {
 			const taqCommands = allCommands.filter(command => command.toLowerCase().includes('taq'));
 			assert.notEqual(taqCommands, undefined);
@@ -48,6 +66,7 @@ describe('Extension Test Suite', () => {
 	// TODO: https://github.com/ecadlabs/taqueria/issues/605
 	it.skip('Verify that VS Code command Taqueria Scaffold will scaffold a project', async () => {
 		// Open taquified project in workspace under testProjectDestination
+		await vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.parse(testProjectDestination));
 
 		// Run taqueria scaffold command
 		await vscode.commands.executeCommand('taqueria.scaffold');
@@ -55,6 +74,9 @@ describe('Extension Test Suite', () => {
 
 	// TODO: https://github.com/ecadlabs/taqueria/issues/686
 	it.skip('Verify that VS Code command Taqueria Start Sandbox starts flextesa sandbox', async () => {
+		// Open taquified project in workspace under testProjectDestination
+		await vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.parse(testProjectDestination));
+
 		// Install plugin
 		await vscode.commands.executeCommand('taqueria.install @taqueria/plugin-flextesa');
 
@@ -73,11 +95,26 @@ describe('Extension Test Suite', () => {
 	});
 
 	// TODO: https://github.com/ecadlabs/taqueria/issues/645
-	it.skip('Verify that VS Code command Taqueria Compile Ligo will compile Ligo contract', async () => {
-		// Install plugin
-		await vscode.commands.executeCommand('taqueria.install @taqueria/plugin-ligo');
+	it('Verify that VS Code command Taqueria Compile Ligo will compile Ligo contract', async () => {
+		// Run taq init
+		await vscodeMock.commands.executeCommand('taqueria.init');
 
-		await vscode.commands.executeCommand('taqueria.compile_ligo');
+		// Install plugin currently disabled and it will require to
+		// Need to mock the function that display the quick-pick that we can return a pre-defined list
+		// And then compare with expected output -
+		// await vscodeMock.commands.executeCommand(`taqueria.install @taqueria/plugin-ligo`);
+		// mockedMethods['window.showInformationMessage']("Hello")
+		await vscodeMock.commands.executeCommand('taqueria.install');
+
+		// Execute ligo compile command
+		await vscodeMock.commands.executeCommand('taqueria.compile_ligo');
+
+		// Run ls command
+		const checkArtifact = await exec(`ls ${testProjectDestination}\artifacts`);
+		// Need to find library to use contains or build it
+		assert.notEqual(checkArtifact, undefined);
+
+		// await fse.rmdir(`${projectRoot}/.vscode-test/user-data/`, {recursive: true})
 
 		// In last test or after all block
 		// vscode.commands.executeCommand("workbench.action.closeActiveEditor");
@@ -85,14 +122,24 @@ describe('Extension Test Suite', () => {
 
 	// TODO: https://github.com/ecadlabs/taqueria/issues/687
 	it.skip('Verify that VS Code command Taqueria Compile SmartPy will compile SmartPy contract', async () => {
+		// Open taquified project in workspace under testProjectDestination
+		await vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.parse(testProjectDestination));
+
 		// Install plugin
 		await vscode.commands.executeCommand('taqueria.install @taqueria/plugin-smartpy');
 
 		await vscode.commands.executeCommand('taqueria.compile_smartpy');
+
+		const checkArtifact = await exec(`ls ${testProjectDestination}\artifacts`);
+		// Need to find library to use contains or build it
+		assert.notEqual(checkArtifact, undefined);
 	});
 
 	// TODO: https://github.com/ecadlabs/taqueria/issues/688
 	it.skip('Verify that VS Code command Taqueria Deploy Contract will deploy contract to a test network', async () => {
+		// Open taquified project in workspace under testProjectDestination
+		await vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.parse(testProjectDestination));
+
 		// Install plugin
 		await vscode.commands.executeCommand('taqueria.install @taqueria/plugin-smartpy');
 

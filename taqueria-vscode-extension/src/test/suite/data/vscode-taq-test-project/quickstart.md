@@ -1,6 +1,7 @@
 ## Overview
 
-This quickstart guide will teach you the fundamentals of using Taqueria in 10 minutes by going through the process of running some basic tasks in Taqueria from the CLI
+
+Welcome to Taqueria! This quickstart guide will teach you the fundamentals of using Taqueria in 10 minutes by going through the process of running some basic tasks in Taqueria from the CLI
 
 What you will accomplish:
 - Initialize a new Taqueria project
@@ -191,8 +192,8 @@ Now you can originate the contract by running:
 taq originate
 ```
 
-This will originate all contracts in the `/artifacts` directory to the sandbox and return the address of the deployed contract and destination sandbox. The output for this command will display which contracts were originated, what the destination was, and what the on-chain address for the deployed address is. This will look something like this:
-```
+This will originate all contracts in the `/artifacts` directory to the sandbox and return the on-chain addresses for the originated contracts. This will look something like this:
+```shell
 ┌────────────┬──────────────────────────────────────┬─────────────┐
 │ Contract   │ Address                              │ Destination │
 ├────────────┼──────────────────────────────────────┼─────────────┤
