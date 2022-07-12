@@ -16,7 +16,7 @@ Options:
   -e, --env         Specify an environment configuration
 
 Taqueria is currently in BETA. You've been warned. :)
-`
+`;
 
 export const helpContentsForProject: string = `taq <command>
 
@@ -36,7 +36,7 @@ Options:
       --help        Show help                                          [boolean]
 
 Taqueria is currently in BETA. You've been warned. :)
-`
+`;
 
 export const helpContentsLigoSmartpy: string = `taq <command>
 
@@ -58,7 +58,7 @@ Options:
       --help        Show help                                          [boolean]
 
 Taqueria is currently in BETA. You've been warned. :)
-`
+`;
 
 export const helpContentsLigoSmartpySpecific = `taq compile
 
@@ -74,7 +74,7 @@ Options:
       --plugin      Specify which plugin should be used to execute this task
   [required] [choices: "@taqueria/plugin-ligo", "ligo", "@taqueria/plugin-smartp
                                                                   y", "smartpy"]
-`
+`;
 
 export const helpContentsLigoArchetype: string = `taq <command>
 
@@ -96,7 +96,7 @@ Options:
       --help        Show help                                          [boolean]
 
 Taqueria is currently in BETA. You've been warned. :)
-`
+`;
 
 export const helpContentsLigoArchetypeSpecific = `taq compile
 
@@ -112,4 +112,4 @@ Options:
       --plugin      Specify which plugin should be used to execute this task
   [required] [choices: "@taqueria/plugin-ligo", "ligo", "@taqueria/plugin-archet
                                                               ype", "archetype"]
-`
+`;

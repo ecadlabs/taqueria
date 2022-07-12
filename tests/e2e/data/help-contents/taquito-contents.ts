@@ -18,7 +18,7 @@ Options:
       --help        Show help                                          [boolean]
 
 Taqueria is currently in BETA. You've been warned. :)
-`
+`;
 
 export const helpContentsTaquitoPluginSpecific = `taq deploy [contract]
 
@@ -31,12 +31,13 @@ Options:
   -e, --env         Specify an environment configuration
   -y, --yes         Select "yes" to any prompt        [boolean] [default: false]
       --help        Show help                                          [boolean]
-`
+`;
 
-export const originateSingleOutput = (address:string) => `
+export const originateSingleOutput = (address: string) =>
+	`
 ┌────────────────┬──────────────────────────────────────┬─────────────┐
 │ Contract       │ Address                              │ Destination │
 ├────────────────┼──────────────────────────────────────┼─────────────┤
 │ hello-tacos.tz │ KT1N4bZh884qhirEsmPge6y8a9mRfhEoMGaX │ hangzhounet │
 └────────────────┴──────────────────────────────────────┴─────────────┘
-`.replace('KT1N4bZh884qhirEsmPge6y8a9mRfhEoMGaX', address).trimStart()
+`.replace('KT1N4bZh884qhirEsmPge6y8a9mRfhEoMGaX', address).trimStart();

@@ -1,29 +1,10 @@
 import createType from '@taqueria/protocol/Base';
-import * as ParsedOperation from '@taqueria/protocol/ParsedOperation';
 import * as PluginInfo from '@taqueria/protocol/PluginInfo';
 import { z } from 'zod';
 
-const internalSchema = PluginInfo.internalSchema.extend({
-	operations: z.preprocess(
-		val => val ?? [],
-		z.array(
-			ParsedOperation.schemas.schema,
-			{ description: 'ParsedOperations' },
-		)
-			.optional(),
-	),
-}).describe('ParsedPluginInfo');
+const internalSchema = PluginInfo.internalSchema.extend({}).describe('ParsedPluginInfo');
 
-export const rawSchema = PluginInfo.internalSchema.extend({
-	operations: z.preprocess(
-		val => val ?? [],
-		z.array(
-			ParsedOperation.rawSchema,
-			{ description: 'ParsedOperation' },
-		),
-	)
-		.optional(),
-}).describe('ParsedPluginInfo');
+export const rawSchema = PluginInfo.internalSchema.extend({}).describe('ParsedPluginInfo');
 
 type Input = z.infer<typeof internalSchema>;
 

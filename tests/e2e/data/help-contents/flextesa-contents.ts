@@ -19,7 +19,7 @@ Options:
       --help        Show help                                          [boolean]
 
 Taqueria is currently in BETA. You've been warned. :)
-`
+`;
 
 export const helpContentsFlextesaPluginStartSandbox = `taq start sandbox [sandboxName]
 
@@ -35,7 +35,7 @@ Options:
   -e, --env         Specify an environment configuration
   -y, --yes         Select "yes" to any prompt        [boolean] [default: false]
       --help        Show help                                          [boolean]
-`
+`;
 export const helpContentsFlextesaPluginStopSandbox = `taq stop sandbox [sandboxName]
 
 Stops a flextesa sandbox
@@ -50,7 +50,7 @@ Options:
   -e, --env         Specify an environment configuration
   -y, --yes         Select "yes" to any prompt        [boolean] [default: false]
       --help        Show help                                          [boolean]
-`
+`;
 
 export const helpContentsFlextesaPluginListAccounts = `taq list accounts <sandboxName>
 
@@ -66,4 +66,4 @@ Options:
   -e, --env         Specify an environment configuration
   -y, --yes         Select "yes" to any prompt        [boolean] [default: false]
       --help        Show help                                          [boolean]
-`
+`;

@@ -4,7 +4,6 @@ import * as Config from '@taqueria/protocol/Config';
 import type { i18n } from '@taqueria/protocol/i18n';
 import * as InstalledPlugin from '@taqueria/protocol/InstalledPlugin';
 import * as Option from '@taqueria/protocol/Option';
-import * as ParsedOperation from '@taqueria/protocol/ParsedOperation';
 import * as ParsedPluginInfo from '@taqueria/protocol/ParsedPluginInfo';
 import { E_TaqError, TaqError } from '@taqueria/protocol/TaqError';
 import * as Task from '@taqueria/protocol/Task';
@@ -23,18 +22,11 @@ const taskToPluginMap = z.record(
 		Task.schemas.schema,
 	], { description: 'Task/Plugin Mapping' }),
 );
-const operationToPluginMap = z.record(
-	z.union([
-		InstalledPlugin.schemas.schema,
-		ParsedOperation.schemas.schema,
-	], { description: 'Operation/Plugin Mapping' }),
-);
 
 const rawSchema = z.object({
 	build: z.string({ description: 'cache.build' }),
 	configHash: z.string({ description: 'cache.configHash' }),
 	tasks: taskToPluginMap,
-	operations: operationToPluginMap,
 	plugins: z.array(ParsedPluginInfo.schemas.schema, { description: 'cache.plugins' }),
 }).describe('Ephemeral State');
 
@@ -49,7 +41,6 @@ export const { schemas: generatedSchemas, factory } = createType<RawInput, RawIn
 export type EphemeralState = z.infer<typeof generatedSchemas.schema>;
 export type t = EphemeralState;
 export type TaskToPluginMap = z.infer<typeof taskToPluginMap>;
-export type OpToPluginMap = z.infer<typeof operationToPluginMap>;
 
 export const { create, of, make } = factory;
 
@@ -75,27 +66,6 @@ const getTaskCounts = (pluginInfo: ParsedPluginInfo.t[]): Counts => {
 							: [pluginInfo];
 						const mapping: Counts = {};
 						mapping[taskName] = providers.filter(provider => provider !== undefined);
-						return { ...retval, ...mapping };
-					},
-					retval,
-				),
-		{} as Counts,
-	);
-};
-
-const getOperationCounts = (pluginInfo: ParsedPluginInfo.t[]): Counts => {
-	return pluginInfo.reduce(
-		(retval, pluginInfo) =>
-			pluginInfo.operations === undefined
-				? retval
-				: pluginInfo.operations.reduce(
-					(retval: Counts, operation: ParsedOperation.t) => {
-						const operationName = operation.operation;
-						const providers = retval[operationName]
-							? [...retval[operationName], pluginInfo]
-							: [pluginInfo];
-						const mapping: Counts = {};
-						mapping[operationName] = providers.filter(provider => provider !== undefined);
 						return { ...retval, ...mapping };
 					},
 					retval,
@@ -141,6 +111,7 @@ export const mapTasksToPlugins = (config: Config.t, pluginInfo: ParsedPluginInfo
 											description: 'Specify which plugin should be used to execute this task',
 											choices: toChoices(taskCounts[task]),
 											required: true,
+											type: 'string',
 										})),
 									],
 									handler: 'proxy',
@@ -157,46 +128,6 @@ export const mapTasksToPlugins = (config: Config.t, pluginInfo: ParsedPluginInfo
 						retval,
 					),
 			Promise.resolve({} as TaskToPluginMap),
-		)
-	).pipe(mapRej(rej => rej as TaqError));
-};
-
-export const mapOperationsToPlugins = (config: Config.t, pluginInfo: ParsedPluginInfo.t[], i18n: i18n) => {
-	const opCounts = getOperationCounts(pluginInfo);
-	return attemptP(async () =>
-		await pluginInfo.reduce(
-			async (retval, pluginInfo) =>
-				!pluginInfo.operations
-					? Promise.resolve({} as OpToPluginMap)
-					: await pluginInfo.operations.reduce(
-						async (retval, { operation }) => {
-							if (isComposite(operation, opCounts)) {
-								const command = await eager(Command.make(operation));
-								const compositeOp = await eager(ParsedOperation.make({
-									operation,
-									command,
-									description: i18n.__('providedByMany'),
-									options: [
-										await eager(Option.make({
-											flag: await eager(Verb.make('plugin')),
-											description: 'Specify which plugin should be used to execute this operation',
-											choices: toChoices(opCounts[operation]),
-											required: true,
-										})),
-									],
-								}));
-								return { ...await retval, [operation]: compositeOp };
-							}
-
-							// Operation is provided by just a single plugin
-							const installedPlugin = getInstalledPlugin(config, pluginInfo.name);
-							return installedPlugin
-								? { ...await retval, [operation]: installedPlugin }
-								: retval;
-						},
-						retval,
-					),
-			Promise.resolve({} as OpToPluginMap),
 		)
 	).pipe(mapRej(rej => rej as TaqError));
 };

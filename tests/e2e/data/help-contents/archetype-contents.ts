@@ -19,7 +19,7 @@ Options:
       --help        Show help                                          [boolean]
 
 Taqueria is currently in BETA. You've been warned. :)
-`
+`;
 
 export const helpContentsArchetypePluginSpecific: string = `taq compile [sourceFile]
 
@@ -32,7 +32,7 @@ Options:
   -e, --env         Specify an environment configuration
   -y, --yes         Select "yes" to any prompt        [boolean] [default: false]
       --help        Show help                                          [boolean]
-`
+`;
 
 export const archetypeNoContracts = `
 ┌────────────┬──────────┐
@@ -40,7 +40,7 @@ export const archetypeNoContracts = `
 ├────────────┼──────────┤
 │ None found │ N/A      │
 └────────────┴──────────┘
-`.trimStart()
+`.trimStart();
 
 export const archetypeNotCompiled = `
 ┌──────────┬──────────────┐
@@ -48,4 +48,4 @@ export const archetypeNotCompiled = `
 ├──────────┼──────────────┤
 │ test.arl │ Not compiled │
 └──────────┴──────────────┘
-`.trimStart()
+`.trimStart();

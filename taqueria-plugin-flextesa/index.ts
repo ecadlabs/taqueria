@@ -17,6 +17,7 @@ Plugin.create(_i18n => ({
 				PositionalArg.create({
 					placeholder: 'sandboxName',
 					description: 'The name of the sandbox to start',
+					type: 'string',
 				}),
 			],
 		}),
@@ -31,6 +32,7 @@ Plugin.create(_i18n => ({
 				PositionalArg.create({
 					placeholder: 'sandboxName',
 					description: 'The name of the sandbox to stop',
+					type: 'string',
 				}),
 			],
 		}),
@@ -45,6 +47,7 @@ Plugin.create(_i18n => ({
 				PositionalArg.create({
 					placeholder: 'sandboxName',
 					description: 'The name of the sandbox to use',
+					type: 'string',
 				}),
 			],
 			encoding: 'json',

@@ -84,6 +84,12 @@ describe('E2E Testing for taqueria contract types plugin with ligo', () => {
 		await exec(`cp e2e/data/increment.jsligo ${taqueriaProjectPath}/contracts`);
 		await exec(`taq compile`, { cwd: `${taqueriaProjectPath}` });
 
+		// TODO:
+		// Related to issue #736 above, when investigating I found that
+		// `generateTypesOutput.stdout` has been truncated - its just one
+		// line of output which is why the expect assertion fails.
+		// However, when I run the `generate types` task manually I see all
+		// lines of output
 		const generateTypesOutput = await exec(`taq generate types`, { cwd: `${taqueriaProjectPath}` });
 		expect(generateTypesOutput.stdout).toContain(`generateTypes { typescriptDir: 'types' }`);
 

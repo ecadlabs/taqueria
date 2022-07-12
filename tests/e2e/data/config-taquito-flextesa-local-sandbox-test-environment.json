@@ -20,16 +20,8 @@
 			"sandboxes": [
 				"local"
 			],
-			"accounts": {
-				"bob": "3_000_000_000",
-				"alice": "3_000_000_000",
-				"john": "3_000_000_000",
-				"jane": "3_000_000_000",
-				"joe": "3_000_000_000"
-			},
 			"storage": {
 				"hello-tacos.tz": "1",
-				"increment.tz": "2",
 				"all-types.tz": {
 					"0": "tz1QZ6KY7d3BuZDT1d19dUxoQrtFPN2QJ3hn",
 					"1": { "key1": 1, "key2": 2 },

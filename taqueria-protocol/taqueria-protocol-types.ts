@@ -8,9 +8,7 @@ import * as i18n from '@taqueria/protocol/i18n';
 import * as InstalledPlugin from '@taqueria/protocol/InstalledPlugin';
 import * as LoadedConfig from '@taqueria/protocol/LoadedConfig';
 import * as NetworkConfig from '@taqueria/protocol/NetworkConfig';
-import * as Operation from '@taqueria/protocol/Operation';
 import * as Option from '@taqueria/protocol/Option';
-import * as ParsedOperation from '@taqueria/protocol/ParsedOperation';
 import * as ParsedPluginInfo from '@taqueria/protocol/ParsedPluginInfo';
 import * as PersistentState from '@taqueria/protocol/PersistentState';
 import * as PluginInfo from '@taqueria/protocol/PluginInfo';
@@ -86,9 +84,7 @@ export {
 	InstalledPlugin,
 	LoadedConfig,
 	NetworkConfig,
-	Operation,
 	Option,
-	ParsedOperation,
 	ParsedPluginInfo,
 	PersistentState,
 	PluginInfo,

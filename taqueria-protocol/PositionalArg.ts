@@ -12,7 +12,8 @@ export const rawSchema = z.object({
 	type: z.union(
 		[z.literal('string'), z.literal('number'), z.literal('boolean')],
 		{ description: 'Positional Arg Datatype' },
-	).optional(),
+	),
+	required: z.boolean().optional(),
 }).describe('Positional Arg');
 
 const internalSchema = z.object({
@@ -25,7 +26,8 @@ const internalSchema = z.object({
 	type: z.union(
 		[z.literal('string'), z.literal('number'), z.literal('boolean')],
 		{ description: 'Positional Arg Datatype' },
-	).optional(),
+	),
+	required: z.boolean().optional(),
 }).describe('Positional Arg');
 
 type RawInput = z.infer<typeof rawSchema>;

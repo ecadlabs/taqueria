@@ -1,6 +1,5 @@
 import * as Alias from '@taqueria/protocol/Alias';
 import createType, { Flatten } from '@taqueria/protocol/Base';
-import * as Operation from '@taqueria/protocol/Operation';
 import * as Task from '@taqueria/protocol/Task';
 import * as VersionNumber from '@taqueria/protocol/VersionNumber';
 import { z } from 'zod';
@@ -17,13 +16,6 @@ export const internalSchema = z.object({
 			{ description: 'Plugin Tasks' },
 		).optional(),
 	),
-	operations: z.preprocess(
-		val => val ?? [],
-		z.array(
-			Operation.schemas.schema.describe('Plugin Operation'),
-			{ description: 'Plugin Operations' },
-		).optional(),
-	),
 }).describe('Plugin Schema');
 
 export const rawSchema = z.object({
@@ -36,13 +28,6 @@ export const rawSchema = z.object({
 		z.array(
 			Task.rawSchema.describe('Plugin Task'),
 			{ description: 'Plugin Tasks' },
-		).optional(),
-	),
-	operations: z.preprocess(
-		val => val ?? [],
-		z.array(
-			Operation.rawSchema.describe('Plugin Operation'),
-			{ description: 'Plugin Operations' },
 		).optional(),
 	),
 }).describe('Plugin Schema');

@@ -255,11 +255,6 @@ export const inject = (deps: PluginDeps) => {
 							pluginInfo,
 							i18n,
 						)),
-						operations: await eager(EphemeralState.mapOperationsToPlugins(
-							await eager(LoadedConfig.toConfig(config)),
-							pluginInfo,
-							i18n,
-						)),
 					}));
 				})
 			),

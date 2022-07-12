@@ -18,7 +18,7 @@ Options:
       --help        Show help                                          [boolean]
 
 Taqueria is currently in BETA. You've been warned. :)
-`
+`;
 
 export const helpContentsSmartpyPluginSpecific = `taq compile [sourceFile]
 
@@ -31,7 +31,7 @@ Options:
   -e, --env         Specify an environment configuration
   -y, --yes         Select "yes" to any prompt        [boolean] [default: false]
       --help        Show help                                          [boolean]
-`
+`;
 
 export const helpContentsSmartpyTeapotSpecific = `taq teapot
 
@@ -45,7 +45,7 @@ Options:
   -y, --yes         Select "yes" to any prompt        [boolean] [default: false]  
       --help        Show help                                          [boolean]
   -g, --green       Make green tea instead                             [boolean]
-`
+`;
 
 export const smartPyCompiledOutput = `
 ┌────────────────┬─────────────────┐
@@ -53,6 +53,6 @@ export const smartPyCompiledOutput = `
 ├────────────────┼─────────────────┤
 │ hello-tacos.py │ HelloTacos_comp │
 └────────────────┴─────────────────┘
-`.trimStart()
+`.trimStart();
 
-export const smartPyNothingCompiled = `No contracts found to compile.\n`
+export const smartPyNothingCompiled = `No contracts found to compile.\n`;

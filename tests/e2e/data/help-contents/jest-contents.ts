@@ -18,7 +18,7 @@ Options:
       --help        Show help                                          [boolean]
 
 Taqueria is currently in BETA. You've been warned. :)
-`
+`;
 
 export const helpContentsJestPluginSpecific = `taq test [partition]
 
@@ -37,4 +37,4 @@ Options:
       --help         Show help                                         [boolean]
   -i, --init         Initializes the partition for Jest                [boolean]
   -t, --testPattern  Run test files that match the provided pattern
-`
+`;

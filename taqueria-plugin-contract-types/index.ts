@@ -15,6 +15,7 @@ Plugin.create(i18n => ({
 					placeholder: 'typescriptDir',
 					description: 'The output directory for the generated type files',
 					defaultValue: 'types',
+					type: 'string',
 				}),
 			],
 			options: [
@@ -23,6 +24,7 @@ Plugin.create(i18n => ({
 					flag: 'typeAliasMode',
 					choices: ['file', 'simple'],
 					description: 'The type aliases used in the generated types',
+					type: 'string',
 				}),
 			],
 			aliases: ['gen types', 'gentypes'],

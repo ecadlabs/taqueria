@@ -17,6 +17,7 @@ Plugin.create(i18n => ({
 					flag: 'sandboxName',
 					description: 'The name of the sandbox to use',
 					required: false,
+					type: 'string',
 				}),
 			],
 			handler: 'proxy',
@@ -24,6 +25,7 @@ Plugin.create(i18n => ({
 				PositionalArg.create({
 					placeholder: 'sourceFiles',
 					description: 'The names of the Michelson contracts you wish to typecheck, separated by space',
+					type: 'string',
 				}),
 			],
 			encoding: 'json',
@@ -39,18 +41,21 @@ Plugin.create(i18n => ({
 					description:
 						'The initial storage used to run the script. The value is a Michelson expression, wrapped in single quotes if specified in the CLI, wrapped in double quotes instead if specified in config.json',
 					required: false,
+					type: 'string',
 				}),
 				Option.create({
 					shortFlag: 's',
 					flag: 'sandboxName',
 					description: 'The name of the sandbox to use',
 					required: false,
+					type: 'string',
 				}),
 				Option.create({
 					flag: 'entrypoint',
 					description:
 						'This makes contract invocation easier by specifying the annotation of an entrypoint (if it exists)',
 					required: false,
+					type: 'string',
 				}),
 			],
 			handler: 'proxy',
@@ -58,10 +63,12 @@ Plugin.create(i18n => ({
 				PositionalArg.create({
 					placeholder: 'sourceFile',
 					description: 'The name of the Michelson contract you wish to simulate',
+					type: 'string',
 				}),
 				PositionalArg.create({
 					placeholder: 'input',
 					description: 'The input used to run the script. The value is a Michelson expression wrapped in single quotes',
+					type: 'string',
 				}),
 			],
 			encoding: 'json',

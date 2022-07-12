@@ -1,6 +1,7 @@
 import createType from '@taqueria/protocol/Base';
 import * as SanitizedAbsPath from '@taqueria/protocol/SanitizedAbsPath';
 import * as Url from '@taqueria/protocol/Url';
+import { omit } from 'rambda';
 import { z } from 'zod';
 
 export const rawSchema = z.object({
@@ -53,6 +54,7 @@ export const rawSchema = z.object({
 	setVersion: z.string().min(3),
 	template: z.string().min(1).optional(),
 	pluginName: z.string().min(1).optional(),
+	task: z.string().min(1).optional(),
 }, { description: 'Sanitizied Args' }).passthrough();
 
 export const scaffoldRawSchema = rawSchema.extend({
@@ -62,10 +64,10 @@ export const scaffoldRawSchema = rawSchema.extend({
 
 export const provisionRawSchema = rawSchema
 	.extend({
-		operation: z
+		task: z
 			.string()
 			.min(1)
-			.describe('Operation name'),
+			.describe('Task name'),
 		name: z
 			.string()
 			.min(1)
@@ -105,7 +107,7 @@ export type t = SanitizedArgs;
 
 export const schemas = {
 	...generatedSchemas,
-	schema: generatedSchemas.schema.transform(val => val as SanitizedArgs),
+	schema: generatedSchemas.schema.transform(val => omit(['p', 'project-dir'], val) as SanitizedArgs),
 };
 
 export const scaffoldTaskArgs = createType<RawScaffoldInput, RawScaffoldInput>({
@@ -118,6 +120,7 @@ export const provisionTaskArgs = createType<RawProvisionInput, RawProvisionInput
 	rawSchema: provisionRawSchema,
 	parseErrMsg: 'The arguments provided are invalid for the provision task',
 	unknownErrMsg: 'Something went wrong parsing the arguments for the provision task',
+	passthrough: true,
 });
 
 export const installTaskArgs = createType<RawManagePluginInput, RawManagePluginInput>({

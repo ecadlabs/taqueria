@@ -11,6 +11,7 @@ interface CreateSchemaParams {
 	internalSchema?: ZodSchema;
 	transformer?: (value: unknown) => unknown;
 	isStringLike?: boolean;
+	passthrough?: boolean;
 }
 
 interface CreateTypeParams extends CreateSchemaParams {
@@ -20,8 +21,11 @@ interface CreateTypeParams extends CreateSchemaParams {
 export type Flatten<T> = { [k in keyof T]: T[k] };
 
 export const createSchema = <I>(params: CreateSchemaParams) => {
-	const { rawSchema, isStringLike } = params;
-	const internalSchema = params.internalSchema ?? params.rawSchema;
+	const { rawSchema, isStringLike, passthrough } = params;
+	const baseSchema = params.internalSchema ?? params.rawSchema;
+	const internalSchema: typeof baseSchema = passthrough
+		? eval('baseSchema.passthrough()')
+		: baseSchema;
 	const noop = (val: unknown) => val;
 	const transformer = params.transformer ?? noop;
 

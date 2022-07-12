@@ -1,3 +1,5 @@
+import * as EphemeralState from '@taqueria/protocol/EphemeralState';
+import * as LoadedConfig from '@taqueria/protocol/LoadedConfig';
 import * as PersistentState from '@taqueria/protocol/PersistentState';
 import * as SanitizedArgs from '@taqueria/protocol/SanitizedArgs';
 import * as TaqError from '@taqueria/protocol/TaqError';
@@ -13,6 +15,7 @@ const {
 	readJsonFile,
 	writeTextFile,
 	memoize,
+	doesPathExist,
 	isTaqError,
 } = utils.inject({
 	stdout: Deno.stdout,
@@ -21,7 +24,7 @@ const {
 
 const toTaskId = (task: Verb.t, plugin: string) => `${plugin}.${task}.${Timestamp.now()}`;
 
-export const getStateAbspath = (parsedArgs: SanitizedArgs.t) =>
+export const getStateRegistryAbspath = (parsedArgs: SanitizedArgs.t) =>
 	joinPaths(
 		parsedArgs.projectDir,
 		'.taq',
@@ -30,10 +33,10 @@ export const getStateAbspath = (parsedArgs: SanitizedArgs.t) =>
 
 export const load = memoize((parsedArgs: SanitizedArgs.t) =>
 	pipe(
-		readJsonFile<PersistentState.t>(getStateAbspath(parsedArgs)),
+		readJsonFile<PersistentState.t>(getStateRegistryAbspath(parsedArgs)),
 		chainRej(previous =>
 			previous.kind === 'E_READFILE'
-				? resolve({ operations: {}, tasks: {} })
+				? resolve({ tasks: {} })
 				: reject(previous)
 		),
 		chain(PersistentState.of),
@@ -44,7 +47,7 @@ export const save = (parsedArgs: SanitizedArgs.t) =>
 	(updatedState: PersistentState.t) =>
 		pipe(
 			JSON.stringify(updatedState, undefined, 4),
-			writeTextFile(getStateAbspath(parsedArgs)),
+			writeTextFile(getStateRegistryAbspath(parsedArgs)),
 			map(_ => updatedState),
 		);
 
@@ -85,4 +88,13 @@ export const addTask = (parsedArgs: SanitizedArgs.t, task: Verb.t, plugin: strin
 					: reject(previous)
 			),
 			map(_ => output),
+		);
+
+export const createStateRegistry = (parsedArgs: SanitizedArgs.t) =>
+	(state: EphemeralState.t) =>
+		pipe(
+			getStateRegistryAbspath(parsedArgs),
+			doesPathExist,
+			chainRej((_: TaqError.t) => writeTextFile(getStateRegistryAbspath(parsedArgs))('{}')),
+			map((_: string) => state),
 		);

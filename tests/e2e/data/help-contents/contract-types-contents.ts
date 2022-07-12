@@ -20,7 +20,7 @@ Options:
       --help        Show help                                          [boolean]
 
 Taqueria is currently in BETA. You've been warned. :)
-`
+`;
 
 export const helpContentsContractTypesPluginSpecific = `taq generate types [typescriptDir]
 
@@ -40,4 +40,4 @@ Options:
       --help           Show help                                       [boolean]
   -t, --typeAliasMode  The type aliases used in the generated types
                                                      [choices: "file", "simple"]
-`
+`;

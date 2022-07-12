@@ -23,9 +23,9 @@ import yargs from 'https://deno.land/x/yargs@v17.4.0-deno/deno.ts';
 import { __, match } from 'https://esm.sh/ts-pattern@3.3.5';
 import * as Analytics from './analytics.ts';
 import * as NPM from './npm.ts';
-import { addTask } from './persistent-state.ts';
+import { addTask, createStateRegistry } from './persistent-state.ts';
 import inject from './plugins.ts';
-import { addNewProvision, apply, loadProvisions, plan } from './provisions.ts';
+import { addNewProvision, createProvisioner, createProvisionerTypes, toYargsOptions } from './provisioner.ts';
 import { getConfig, getDefaultMaxConcurrency } from './taqueria-config.ts';
 import type {
 	InstalledPlugin,
@@ -159,10 +159,11 @@ const commonCLI = (env: EnvVars, args: DenoArgs, i18n: i18n.t) =>
 		.hide('debug')
 		.option('quickstart')
 		.hide('quickstart')
-		.option('p', {
-			alias: 'projectDir',
+		.option('projectDir', {
+			alias: 'p',
 			default: './',
 			describe: i18n.__('initPathDesc'),
+			type: 'string',
 		})
 		.hide('projectDir')
 		.option('env', {
@@ -177,7 +178,7 @@ const commonCLI = (env: EnvVars, args: DenoArgs, i18n: i18n.t) =>
 				yargs.positional('projectDir', {
 					describe: i18n.__('initPathDesc'),
 					type: 'string',
-					default: getFromEnv('TAQ_PROJECT_DIR', '.', env),
+					default: getFromEnv('TAQ_PROJECT_DIR', './', env),
 				});
 			},
 			(args: Record<string, unknown>) =>
@@ -224,7 +225,7 @@ const commonCLI = (env: EnvVars, args: DenoArgs, i18n: i18n.t) =>
 		.help(false);
 
 const initCLI = (env: EnvVars, args: DenoArgs, i18n: i18n.t) => {
-	const cliConfig = commonCLI(env, args, i18n).help(false);
+	const cliConfig = commonCLI(env, args, i18n);
 	return cliConfig
 		.command(
 			'scaffold [scaffoldUrl] [scaffoldProjectDir]',
@@ -437,75 +438,55 @@ const getCanonicalTask = (pluginName: string, taskName: string, state: Ephemeral
 		undefined,
 	);
 
-const addOperations = (
+const exposeProvisioningTasks = (
 	cliConfig: CLIConfig,
 	config: LoadedConfig.t,
 	_env: EnvVars,
-	_parsedArgs: SanitizedArgs.t,
-	_i18n: i18n.t,
+	parsedArgs: SanitizedArgs.t,
+	i18n: i18n.t,
 	state: EphemeralState.t,
 	_pluginLib: PluginLib,
 ) =>
 	cliConfig.command(
-		'provision <operation> [..operation args]',
-		'Provision an operation to populate project state',
+		'provision <task>',
+		'Provision a task to populate project state',
 		(yargs: CLIConfig) => {
-			yargs.positional('operation', {
-				describe: 'The name of the operation to provision',
+			yargs.positional('task', {
+				describe: 'The name of the task to provision',
 				required: true,
 				type: 'string',
-				choices: Object.keys(state.operations),
+				choices: Object.keys(state.tasks),
 			});
 			yargs.option('name', {
 				describe: 'Unique name of the provisioner',
 				type: 'string',
 			});
+
+			if (parsedArgs._.length >= 2) {
+				toYargsOptions(state, parsedArgs._[1].toString(), parsedArgs.plugin)(yargs);
+			}
 		},
 		(argv: Arguments) =>
 			pipe(
 				SanitizedArgs.ofProvisionTaskArgs(argv),
-				chain(inputArgs => addNewProvision(inputArgs, config, state)),
-				map(() => 'Added provision to .taq/provisions.json'),
+				chain(inputArgs => addNewProvision(inputArgs, state, i18n)),
 				forkCatch(displayError(cliConfig))(displayError(cliConfig))(log),
 			),
 	)
 		.command(
 			'plan',
-			'Display the execution plan for applying all provisioned operations',
+			'Display the execution plan for applying all provisioned tasks',
 			() => {},
 			(argv: Arguments) =>
 				pipe(
 					SanitizedArgs.of(argv),
-					map(inputArgs => joinPaths(inputArgs.projectDir, '.taq', 'provisions.json')),
-					chain(SanitizedAbsPath.make),
-					chain(loadProvisions),
-					map(plan),
-					forkCatch(displayError(cliConfig))(displayError(cliConfig))(log),
+					// map(inputArgs => joinPaths(inputArgs.projectDir, '.taq', 'provisions.json')),
+					// chain(SanitizedAbsPath.make),
+					// chain(loadProvisions),
+					// map(plan),
+					// forkCatch(displayError(cliConfig))(displayError(cliConfig))(log),
 				),
 		);
-
-const addTemplates = (
-	cliConfig: CLIConfig,
-	_config: LoadedConfig.t,
-	_env: EnvVars,
-	_parsedArgs: SanitizedArgs.t,
-	_i18n: i18n.t,
-	_state: EphemeralState.t,
-	_pluginLib: PluginLib,
-) =>
-	cliConfig.command(
-		'create <template>',
-		'Create an entity from a pre-existing template',
-		() => {
-			console.log('Configuring create template!');
-		},
-		() => {
-			console.log('Create template!');
-			Deno.exit(10);
-		},
-	)
-		.alias('create-tmpl', 'create')
-		.alias('create-template', 'create');
 
 const getPluginOption = (task: Task.t) => {
 	return task.options?.find(option => option.flag === 'plugin');
@@ -603,10 +584,10 @@ const exposeTask = (
 								default: option.defaultValue,
 								demandOption: option.required,
 								describe: option.description,
+								type: option.type,
 							};
 
 							if (option.choices && option.choices.length) optionSettings.choices = option.choices;
-							if (option.boolean) optionSettings['boolean'] = true;
 							return cli.option(option.flag, optionSettings);
 						},
 						cliConfig,
@@ -620,6 +601,7 @@ const exposeTask = (
 								describe: positional.description,
 								type: positional.type,
 								default: positional.defaultValue,
+								required: positional.required,
 							};
 
 							return cli.positional(positional.placeholder, positionalSettings);
@@ -670,10 +652,15 @@ const loadEphermeralState = (
 	i18n: i18n.t,
 	state: EphemeralState.t,
 	pluginLib: PluginLib,
-): CLIConfig =>
-	[exposeTasks /* addOperations, addTemplates*/].reduce(
-		(cliConfig: CLIConfig, fn) => fn(cliConfig, config, env, parsedArgs, i18n, state, pluginLib),
-		cliConfig,
+) =>
+	pipe(
+		taqResolve(cliConfig),
+		map((cliConfig: CLIConfig) =>
+			[exposeTasks, exposeProvisioningTasks].reduce(
+				(cliConfig: CLIConfig, fn) => fn(cliConfig, config, env, parsedArgs, i18n, state, pluginLib),
+				cliConfig,
+			)
+		),
 	);
 
 const renderPluginJsonRes = (decoded: PluginJsonResponse) => {
@@ -747,7 +734,10 @@ const extendCLI = (env: EnvVars, parsedArgs: SanitizedArgs.t, i18n: i18n.t) =>
 
 				return pipe(
 					pluginLib.getState(),
-					map((state: EphemeralState.t) =>
+					chain(createStateRegistry(parsedArgs)),
+					chain(createProvisionerTypes(config)),
+					chain(createProvisioner(config)),
+					chain((state: EphemeralState.t) =>
 						pipe(
 							resolvePluginName(parsedArgs, state),
 							(parsedArgs: SanitizedArgs.t) =>
@@ -756,7 +746,7 @@ const extendCLI = (env: EnvVars, parsedArgs: SanitizedArgs.t, i18n: i18n.t) =>
 					),
 				);
 			}),
-			map((cliConfig: CLIConfig) => cliConfig.help()),
+			map((cliConfig: CLIConfig) => cliConfig.help(true)),
 			chain(parseArgs),
 			chain(inputArgs => SanitizedArgs.of(inputArgs)),
 			chain(showInvalidTask(cliConfig)),
@@ -798,7 +788,7 @@ export const run = (env: EnvVars, inputArgs: DenoArgs, i18n: i18n.t) => {
 			initCLI(env, processedInputArgs, i18n),
 			(cliConfig: CLIConfig) =>
 				pipe(
-					cliConfig,
+					cliConfig.help(false),
 					parseArgs,
 					chain(SanitizedArgs.of),
 					chain((initArgs: SanitizedArgs.t) => {
@@ -871,38 +861,36 @@ export const displayError = (cli: CLIConfig) =>
 			cli.getInternalMethods().getUsageInstance().showHelp(inputArgs.help ? 'log' : 'error');
 		}
 
-		if (!inputArgs.help) {
-			console.error(''); // empty line
-			const res = match(normalizeErr(err))
-				.with({ kind: 'E_FORK' }, err => [125, err.msg])
-				.with({ kind: 'E_INVALID_CONFIG' }, err => [1, err.msg])
-				.with({ kind: 'E_INVALID_JSON' }, err => [12, err])
-				.with({ kind: 'E_INVALID_PATH_ALREADY_EXISTS' }, err => [3, `${err.msg}: ${err.context}`])
-				.with({ kind: 'E_INVALID_PATH_DOES_NOT_EXIST' }, err => [4, `${err.msg}: ${err.context}`])
-				.with({ kind: 'E_INVALID_TASK' }, err => [5, err.msg])
-				.with({ kind: 'E_INVALID_PLUGIN_RESPONSE' }, err => [6, err.msg])
-				.with({ kind: 'E_MKDIR_FAILED' }, err => [7, `${err.msg}: ${err.context}`])
-				.with({ kind: 'E_NPM_INIT' }, err => [8, err.msg])
-				.with({ kind: 'E_READFILE' }, err => [9, err.msg])
-				.with({ kind: 'E_GIT_CLONE_FAILED' }, err => [10, `${err.msg}: ${err.context}`])
-				.with({ kind: 'E_INVALID_ARGS' }, err => [11, err.msg])
-				.with({ kind: 'E_PROVISION' }, err => [12, err.msg])
-				.with({ kind: 'E_PARSE' }, err => [13, err.msg])
-				.with({ kind: 'E_PARSE_UNKNOWN' }, err => [14, err.msg])
-				.with({ kind: 'E_INVALID_ARCH' }, err => [15, err.msg])
-				.with({ kind: 'E_NO_PROVISIONS' }, err => [16, err.msg])
-				.with({ kind: 'E_INVALID_PATH_EXISTS_AND_NOT_AN_EMPTY_DIR' }, err => [17, `${err.msg}: ${err.context}`])
-				.with({ kind: 'E_INTERNAL_LOGICAL_VALIDATION_FAILURE' }, err => [18, `${err.msg}: ${err.context}`])
-				.with({ message: __.string }, err => [128, err.message])
-				.exhaustive();
+		console.error(''); // empty line
+		const res = match(normalizeErr(err))
+			.with({ kind: 'E_FORK' }, err => [125, err.msg])
+			.with({ kind: 'E_INVALID_CONFIG' }, err => [1, err.msg])
+			.with({ kind: 'E_INVALID_JSON' }, err => [12, err])
+			.with({ kind: 'E_INVALID_PATH_ALREADY_EXISTS' }, err => [3, `${err.msg}: ${err.context}`])
+			.with({ kind: 'E_INVALID_PATH_DOES_NOT_EXIST' }, err => [4, `${err.msg}: ${err.context}`])
+			.with({ kind: 'E_INVALID_TASK' }, err => [5, err.msg])
+			.with({ kind: 'E_INVALID_PLUGIN_RESPONSE' }, err => [6, err.msg])
+			.with({ kind: 'E_MKDIR_FAILED' }, err => [7, `${err.msg}: ${err.context}`])
+			.with({ kind: 'E_NPM_INIT' }, err => [8, err.msg])
+			.with({ kind: 'E_READFILE' }, err => [9, err.msg])
+			.with({ kind: 'E_GIT_CLONE_FAILED' }, err => [10, `${err.msg}: ${err.context}`])
+			.with({ kind: 'E_INVALID_ARGS' }, err => [11, err.msg])
+			.with({ kind: 'E_PROVISION' }, err => [12, err.msg])
+			.with({ kind: 'E_PARSE' }, err => [13, err.msg])
+			.with({ kind: 'E_PARSE_UNKNOWN' }, err => [14, err.msg])
+			.with({ kind: 'E_INVALID_ARCH' }, err => [15, err.msg])
+			.with({ kind: 'E_NO_PROVISIONS' }, err => [16, err.msg])
+			.with({ kind: 'E_INVALID_PATH_EXISTS_AND_NOT_AN_EMPTY_DIR' }, err => [17, `${err.msg}: ${err.context}`])
+			.with({ kind: 'E_INTERNAL_LOGICAL_VALIDATION_FAILURE' }, err => [18, `${err.msg}: ${err.context}`])
+			.with({ message: __.string }, err => [128, err.message])
+			.exhaustive();
 
-			const [exitCode, msg] = res;
-			if (inputArgs.debug) {
-				logAllErrors(err);
-			} else console.error(msg);
+		const [exitCode, msg] = res;
+		if (inputArgs.debug) {
+			logAllErrors(err);
+		} else console.error(msg);
 
-			Deno.exit(exitCode as number);
-		}
+		Deno.exit(exitCode as number);
 	};
 
 const logAllErrors = (err: Error | TaqError.E_TaqError | TaqError.t | unknown) => {
