@@ -20,7 +20,7 @@ let dockerName: string;
 // since a container is already running. However, this container was started using a volume associated with the e2e/auto-test-flextesa-plugin.
 // As a result, when running tests in tezos-client.spec, it will complain that files don't exist.
 describe('E2E Testing for taqueria typechecker and simulator tasks of the tezos-client plugin', () => {
-	dockerName = 'local';
+	dockerName = 'local-tezos-client';
 
 	beforeAll(async () => {
 		await generateTestProject(taqueriaProjectPath, ['tezos-client', 'flextesa']);
@@ -401,7 +401,7 @@ describe('E2E Testing for taqueria flextesa plugin sandbox starts/stops', () => 
 	test('Verify that taqueria flextesa plugin can start and stop a default sandbox without specifying name', async () => {
 		try {
 			// Setting up docker container name
-			dockerName = 'local';
+			dockerName = 'local-flextesa';
 
 			// 1. Run sandbox start command
 			const sandboxStart = await exec(`taq start sandbox`, { cwd: `./${taqueriaProjectPath}` });
