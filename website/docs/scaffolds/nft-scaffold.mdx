@@ -1,0 +1,76 @@
+---
+title: The NFT Scaffold Project
+---
+
+| Scaffold Details                                                          |         
+|--------------------|------------------------------------------------------|
+| Complexity         | Advanced                                             |
+| Automated Tests    | No                                                   |
+| Installed Plugins  | LIGO, Taquito, Flextesa, Contract Types, IPFS-Pinata |
+| Frontend Dapp      | Yes                                                  |
+| Wallet Integration | Yes                                                  |
+
+:::warning
+The NFT-Scaffold project is currently in alpha. It is not ready for production use and will be undergoing frequent updates as we work to implement Taqueria State and other features that have not yet been released
+:::
+
+## Project Setup 
+
+1. Scaffold the project by running:
+
+```bash
+taq scaffold https://github.com/ecadlabs/taqueria-scaffold-quickstart quickstart-project 
+```
+
+2. Create the file `./taqueria/.env
+
+3. Get your Pinata JWT token from your [Pinata account](https://app.pinata.cloud/signin)
+
+4. Add the token to the `.env` file you created:
+
+```shell
+pinataJwtToken=eyJhbGc...
+```
+
+5. Start the Taqueria project by running the start script:
+
+```shell
+npm run start:taqueria:local
+```
+
+6. Apply the Provisions
+
+```shell
+npm run apply
+```
+
+7. Start the dApp:
+
+```shell
+npm run start:app
+```
+
+Use the Dapp (served in your browser at [http://localhost:3000](http://localhost:3000)) by connecting a wallet and using the web UI
+
+## Project Structure
+
+- `app`
+    
+    - Minimal create react app
+    - Call contract methods
+    - Access contract storage
+
+- `taqueria`
+
+    - Everything related to the contract
+    - `taqueria/.taq`
+        - Taqueria config folder, including setup for all required plugins
+    - `taqueria/contracts`
+        - The contract .ligo code
+    - `taqueria/artifacts`
+        - The compiled contract (*.tz file)
+    - `taqueria/typings`
+        - The contract typescript typing
+    - `taqueria/assets`
+        - The NFT assets to upload
+
