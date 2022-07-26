@@ -207,13 +207,22 @@ jobs:
       dir: taqueria-plugin-contract-types
     secrets:
       NPM_TOKEN: ${{ secrets.NPMJS_PAT }}
-
+  
   publish-ipfs-pinata-plugin-to-npm:
     if: ${{ !github.event.pull_request.head.repo.fork }}
     # needs: publish-sdk-to-npm
     uses: ./.github/workflows/npm-publish.yml
     with:
       dir: taqueria-plugin-ipfs-pinata
+    secrets:
+      NPM_TOKEN: ${{ secrets.NPMJS_PAT }}
+
+  publish-metadata-plugin-to-npm:
+    if: ${{ !github.event.pull_request.head.repo.fork }}
+    # needs: publish-sdk-to-npm
+    uses: ./.github/workflows/npm-publish.yml
+    with:
+      dir: taqueria-plugin-metadata
     secrets:
       NPM_TOKEN: ${{ secrets.NPMJS_PAT }}
 
@@ -350,7 +359,7 @@ jobs:
 
       - name: builds for testing
         run: |
-          npm run build -w taqueria-sdk -w taqueria-plugin-flextesa -w taqueria-plugin-taquito -w taqueria-plugin-ligo -w taqueria-plugin-smartpy -w taqueria-flextesa-manager -w taqueria-plugin-contract-types -w taqueria-plugin-ipfs-pinata -w taqueria-plugin-archetype -w taqueria-plugin-tezos-client -w taqueria-state -w taqueria-plugin-jest
+          npm run build -w taqueria-sdk -w taqueria-plugin-flextesa -w taqueria-plugin-taquito -w taqueria-plugin-ligo -w taqueria-plugin-smartpy -w taqueria-flextesa-manager -w taqueria-plugin-contract-types -w taqueria-plugin-ipfs-pinata -w taqueria-plugin-metadata -w taqueria-plugin-archetype -w taqueria-plugin-tezos-client -w taqueria-state -w taqueria-plugin-jest
           npm run build-docker -w taqueria-flextesa-manager
 
       - name: Run unit tests
@@ -455,6 +464,7 @@ jobs:
             const flextesa = readInfo("./taqueria-plugin-flextesa/package.json")
             const contractTypes = readInfo("./taqueria-plugin-contract-types/package.json")
             const ipfsPinata = readInfo("./taqueria-plugin-ipfs-pinata/package.json")
+            const metadata = readInfo("./taqueria-plugin-metadata/package.json")
             const archetype = readInfo("./taqueria-plugin-archetype/package.json")
             const tezosClient = readInfo("./taqueria-plugin-tezos-client/package.json")
             const stateJS = readInfo("./taqueria-state/package.json")
@@ -486,6 +496,7 @@ jobs:
                           taq install ${{ env.SCOPE }}/${flextesa.name}@0.0.0-pr-${{ github.event.number }}-${git_short_sha}<br>
                           taq install ${{ env.SCOPE }}/${contractTypes.name}@0.0.0-pr-${{ github.event.number }}-${git_short_sha}<br/>
                           taq install ${{ env.SCOPE }}/${ipfsPinata.name}@0.0.0-pr-${{ github.event.number }}-${git_short_sha}<br/>
+                          taq install ${{ env.SCOPE }}/${metadata.name}@0.0.0-pr-${{ github.event.number }}-${git_short_sha}<br/>
                           taq install ${{ env.SCOPE }}/${archetype.name}@0.0.0-pr-${{ github.event.number }}-${git_short_sha}
                           taq install ${{ env.SCOPE }}/${tezosClient.name}@0.0.0-pr-${{ github.event.number }}-${git_short_sha}
                           taq install ${{ env.SCOPE }}/${stateJS.name}@0.0.0-pr-${{ github.event.number }}-${git_short_sha}

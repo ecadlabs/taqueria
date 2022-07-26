@@ -163,6 +163,8 @@ tests/coverage
 /taqueria-plugin-jest/index.d.ts
 /taqueria-plugin-ipfs-pinata/index.js.map
 /taqueria-plugin-ipfs-pinata/index.js
+/taqueria-plugin-metadata/index.js.map
+/taqueria-plugin-metadata/index.js
 
 # VS Code Extension
 /taqueria-vscode-extension/out

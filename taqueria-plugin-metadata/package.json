@@ -1,0 +1,42 @@
+{
+	"name": "@taqueria/plugin-metadata",
+	"version": "0.10.0",
+	"description": "A plugin for Taqueria providing metadata creation and validation.",
+	"keywords": [
+		"taqueria",
+		"plugin",
+		"metadata",
+		"ecad",
+		"ecadlabs",
+		"tezos"
+	],
+	"targets": {
+		"default": {
+			"source": "./index.ts",
+			"distDir": "./",
+			"context": "node",
+			"isLibrary": true,
+			"outputFormat": "esmodule"
+		}
+	},
+	"scripts": {
+		"build": "npx tsc -noEmit -p ./tsconfig.json && npx parcel build --no-cache 2>&1"
+	},
+	"author": "ECAD Labs",
+	"license": "Apache-2.0",
+	"type": "module",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/ecadlabs/taqueria.git",
+		"directory": "taqueria-plugin-metadata"
+	},
+	"dependencies": {
+		"@taqueria/node-sdk": "^0.10.0",
+		"prompts": "^2.4.2"
+	},
+	"devDependencies": {
+		"@types/prompts": "^2.0.14",
+		"parcel": "^2.6.0",
+		"typescript": "4.7.2"
+	}
+}
