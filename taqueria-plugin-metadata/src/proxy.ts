@@ -1,4 +1,4 @@
-import { getContracts, sendAsyncErr, sendJsonRes } from '@taqueria/node-sdk';
+import { getContracts, sendAsyncErr, sendJsonRes, writeJsonFile } from '@taqueria/node-sdk';
 import { RequestArgs } from '@taqueria/node-sdk/types';
 import fs from 'fs/promises';
 import path from 'path';
@@ -15,11 +15,14 @@ type PluginResponse =
 interface Opts extends RequestArgs.ProxyRequestArgs {
 	readonly contractName?: string;
 }
+type Config = Opts['config'];
 
 const createContractMetadata = async (
 	contractName: undefined | string,
-	contracts: undefined | string[],
+	config: Config & { configFile: string; metadata?: Partial<ProjectMetadata> },
 ): Promise<PluginResponse> => {
+	const contracts = Object.keys(config.contracts ?? {}).map(x => path.basename(x, path.extname(x)));
+
 	if (!contractName) {
 		if (contracts?.length) {
 			// Show contract options
@@ -69,8 +72,17 @@ const createContractMetadata = async (
 		console.log('Existing Metadata:', defaultValues);
 	}
 
+	// Load project metadata for defaults
+	if (!defaultValues && config.metadata) {
+		defaultValues = {
+			...config.metadata,
+			// use the contractName instead of the projectName as the name default
+			name: contractName,
+		};
+	}
+
+	// Load other contracts for defaults
 	if (!defaultValues && contracts?.length) {
-		// Load other contracts for defaults
 		const otherContractMetadata = (await Promise.all(contracts.map(async x => await loadContractMetadata(x))))
 			.filter(x => x).map(x => x!) ?? [];
 		defaultValues = {
@@ -147,6 +159,79 @@ const createContractMetadata = async (
 	};
 };
 
+type ProjectMetadata = {
+	name: string;
+	projectDescription: string;
+	authors: string[];
+	license: string;
+	homepage: string;
+};
+const createProjectMetadata = async (
+	config: Config & { configFile: string; metadata?: Partial<ProjectMetadata> },
+): Promise<PluginResponse> => {
+	const defaultValues: Partial<ProjectMetadata> = config.metadata ?? {};
+
+	// Common fields from Tzip-16
+	const response = await prompts([
+		{
+			type: `text`,
+			name: `name`,
+			message: `Enter project name`,
+			initial: defaultValues?.name ?? '',
+		},
+		{
+			type: `text`,
+			name: `description`,
+			message: `Enter project description`,
+			initial: defaultValues?.projectDescription ?? '',
+		},
+		{
+			type: 'list',
+			name: 'authors',
+			message: 'Enter project authors (comma separated)',
+			initial: defaultValues?.authors?.join(',') ?? '',
+			separator: ',',
+		},
+		{
+			type: 'text',
+			name: 'homepage',
+			message: 'Enter project web url',
+			initial: defaultValues?.homepage ?? '',
+		},
+		{
+			type: 'text',
+			name: 'license',
+			message: 'Enter project license',
+			initial: defaultValues?.license ?? 'ISC',
+		},
+	]) as {
+		name: string;
+		description: string;
+		authors: string[];
+		license: string;
+		homepage: string;
+	};
+
+	const projectMetadata: ProjectMetadata = {
+		name: response.name,
+		projectDescription: response.description,
+		authors: response.authors,
+		homepage: response.homepage,
+		license: response.license,
+	};
+
+	const updatedConfig = {
+		...config,
+		metadata: projectMetadata,
+	};
+	await writeJsonFile(config.configFile)(updatedConfig);
+
+	return {
+		render: 'table',
+		data: Object.values(projectMetadata).map(([k, v]) => ({ key: k, value: v })),
+	};
+};
+
 const execute = async (opts: Opts): Promise<PluginResponse> => {
 	const {
 		task,
@@ -154,11 +239,11 @@ const execute = async (opts: Opts): Promise<PluginResponse> => {
 		config,
 	} = opts;
 
-	const contracts = Object.keys(config.contracts ?? {}).map(x => path.basename(x, path.extname(x)));
-
 	switch (task) {
 		case 'metadata':
-			return createContractMetadata(contractName, contracts);
+			return createContractMetadata(contractName, config as (typeof config & { metadata?: ProjectMetadata }));
+		case 'project-metadata':
+			return createProjectMetadata(config as (typeof config & { metadata?: ProjectMetadata }));
 		default:
 			throw new Error(`${task} is not an understood task by the metadata plugin`);
 	}

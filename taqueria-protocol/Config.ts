@@ -2,6 +2,7 @@ import createType, { Flatten } from '@taqueria/protocol/Base';
 import * as Contract from '@taqueria/protocol/Contract';
 import * as Environment from '@taqueria/protocol/Environment';
 import * as InstalledPlugin from '@taqueria/protocol/InstalledPlugin';
+import * as MetadataConfig from '@taqueria/protocol/MetadataConfig';
 import * as NetworkConfig from '@taqueria/protocol/NetworkConfig';
 import * as SandboxConfig from '@taqueria/protocol/SandboxConfig';
 import * as Tz from '@taqueria/protocol/Tz';
@@ -101,6 +102,7 @@ export const internalSchema = commonSchema.extend({
 	environment: environmentMap,
 	accounts: accountsMap,
 	contracts: z.record(Contract.schemas.schema).optional(),
+	metadata: MetadataConfig.schemas.schema.optional(),
 });
 
 export const rawSchema = commonSchema.extend({
@@ -138,6 +140,7 @@ export const rawSchema = commonSchema.extend({
 			{ description: 'config.accounts' },
 		)
 		.optional(),
+	metadata: MetadataConfig.rawSchema.optional(),
 }).describe('config');
 
 type RawInput = z.infer<typeof rawSchema>;

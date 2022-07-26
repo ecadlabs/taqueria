@@ -21,6 +21,14 @@ Plugin.create(() => ({
 			],
 			encoding: 'none',
 		}),
+		Task.create({
+			task: 'project-metadata',
+			command: 'generate project-metadata',
+			description: 'Create project metadata to be used as defaults for contracts.',
+			aliases: [],
+			handler: 'proxy',
+			encoding: 'none',
+		}),
 	],
 	proxy,
 }), process.argv);
