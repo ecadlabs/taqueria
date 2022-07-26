@@ -52,6 +52,10 @@ jobs:
           git config --global core.autocrlf false
           git config --global core.eol lf
         if: runner.os == 'Windows'
+
+      - name: Install LMDB for Windows
+        run: python -mpip install lmdb
+        if: runner.os == 'Windows'
       
       - name: Install Node
         uses: actions/setup-node@v2
