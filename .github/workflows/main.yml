@@ -83,7 +83,7 @@ jobs:
       - name: Setup Deno
         uses: denoland/setup-deno@v1
         with:
-          deno-version: v1.x
+          deno-version: "1.23.4"
 
       - uses: actions/cache@v3
         with:
@@ -278,7 +278,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-latest,macos-latest]
+        os: [ubuntu-latest, macos-latest]
         chunk-ids: ${{ fromJson(needs.gather-info-for-e2e-tests.outputs['test-chunk-ids']) }}
         include:
         - os: ubuntu-latest
@@ -311,7 +311,7 @@ jobs:
       
       - uses: denoland/setup-deno@v1
         with:
-          deno-version: "1.18.2"
+          deno-version: "1.23.4"
 
       - uses: actions/cache@v3
         with:

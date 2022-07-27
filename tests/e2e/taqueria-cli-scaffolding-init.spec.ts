@@ -3,11 +3,11 @@ import fsPromises from 'fs/promises';
 import util from 'util';
 const exec = util.promisify(exec1);
 
-describe.skip('E2E Testing for taqueria scaffolding initialization,', () => {
-	const scaffoldDirName = `taqueria-quickstart`;
+describe('E2E Testing for taqueria scaffolding initialization,', () => {
+	const scaffoldDirName = `taqueria-taco-shop`;
 
-	test('Verify that taq scaffold will create a baseline scaffold of the quickstart project', async () => {
-		// the URL for the default scaffold project is https://github.com/ecadlabs/taqueria-scaffold-quickstart.git
+	test('Verify that taq scaffold will create a baseline scaffold of the taco shop project', async () => {
+		// the URL for the default scaffold project is https://github.com/ecadlabs/taqueria-scaffold-taco-shop
 		try {
 			await exec('taq scaffold');
 			const homeDirContents = await exec('ls');
@@ -24,7 +24,7 @@ describe.skip('E2E Testing for taqueria scaffolding initialization,', () => {
 			try {
 				await fsPromises.rm(`./${scaffoldDirName}`, { recursive: true, force: true });
 			} catch {
-				// Ensure that this path doesn't already exist
+				// Ensure that this path doesn't already exist 
 			}
 
 			await exec('taq scaffold');
@@ -32,7 +32,10 @@ describe.skip('E2E Testing for taqueria scaffolding initialization,', () => {
 
 			expect(scaffoldDirContents.stdout).toContain('README.md');
 			expect(scaffoldDirContents.stdout).toContain('app');
-			expect(scaffoldDirContents.stdout).toContain('taqueria');
+			expect(scaffoldDirContents.stdout).toContain('contracts');
+			expect(scaffoldDirContents.stdout).toContain('artifacts');
+			expect(scaffoldDirContents.stdout).toContain('node_modules');
+			expect(scaffoldDirContents.stdout).toContain('scaffold.log');
 			expect(scaffoldDirContents.stdout).toContain('package.json');
 
 			await fsPromises.rm(`./${scaffoldDirName}`, { recursive: true });
@@ -73,13 +76,17 @@ describe.skip('E2E Testing for taqueria scaffolding initialization,', () => {
 				// Ensure that this path doesn't already exist
 			}
 
-			await exec('taq scaffold https://github.com/microsoft/calculator.git');
+			await exec('taq scaffold https://github.com/ecadlabs/taqueria-scaffold-nft.git');
 			const scaffoldDirContents = await exec(`ls ${scaffoldDirName}`);
 
 			expect(scaffoldDirContents.stdout).toContain('README.md');
-			expect(scaffoldDirContents.stdout).toContain('Tools');
-			expect(scaffoldDirContents.stdout).toContain('docs');
-			expect(scaffoldDirContents.stdout).toContain('nuget.config');
+			expect(scaffoldDirContents.stdout).toContain('app');
+			expect(scaffoldDirContents.stdout).toContain('taqueria');
+			expect(scaffoldDirContents.stdout).toContain('contracts');
+			expect(scaffoldDirContents.stdout).toContain('artifacts');
+			expect(scaffoldDirContents.stdout).toContain('node_modules');
+			expect(scaffoldDirContents.stdout).toContain('scaffold.log');
+			expect(scaffoldDirContents.stdout).toContain('package.json');
 
 			await fsPromises.rm(`./${scaffoldDirName}`, { recursive: true, force: true });
 		} catch (error) {
@@ -102,12 +109,15 @@ describe.skip('E2E Testing for taqueria scaffolding initialization,', () => {
 		const alternateDirectory = 'alt-directory';
 
 		try {
-			await exec(`taq scaffold https://github.com/ecadlabs/taqueria-scaffold-quickstart.git ${alternateDirectory}`);
+			await exec(`taq scaffold https://github.com/ecadlabs/taqueria-scaffold-taco-shop.git ${alternateDirectory}`);
 			const scaffoldDirContents = await exec(`ls ${alternateDirectory}`);
 
 			expect(scaffoldDirContents.stdout).toContain('README.md');
 			expect(scaffoldDirContents.stdout).toContain('app');
-			expect(scaffoldDirContents.stdout).toContain('taqueria');
+			expect(scaffoldDirContents.stdout).toContain('contracts');
+			expect(scaffoldDirContents.stdout).toContain('artifacts');
+			expect(scaffoldDirContents.stdout).toContain('node_modules');
+			expect(scaffoldDirContents.stdout).toContain('scaffold.log');
 			expect(scaffoldDirContents.stdout).toContain('package.json');
 
 			await fsPromises.rm(`./${alternateDirectory}`, { recursive: true, force: true });
@@ -116,18 +126,17 @@ describe.skip('E2E Testing for taqueria scaffolding initialization,', () => {
 		}
 	});
 
-	test('Verify that taq scaffold quickstart project cannot be injected into an existing directory', async () => {
+	test.only('Verify that taq scaffold quickstart project cannot be injected into an existing directory', async () => {
 		const alternateDirectory = 'alt-directory';
 
 		try {
 			await fsPromises.mkdir(`${alternateDirectory}`);
 			await exec(
-				`taq scaffold https://github.com/ecadlabs/taqueria-scaffold-quickstart.git ${alternateDirectory}`,
+				`taq scaffold https://github.com/ecadlabs/taqueria-scaffold-taco-shop.git ${alternateDirectory}`,
 			);
 		} catch (error) {
 			expect(JSON.stringify(error)).toContain('Path already exists');
-
-			await fsPromises.rm(`./${alternateDirectory}`, { recursive: true });
 		}
+		await fsPromises.rm(`./${alternateDirectory}`, { recursive: true, force: true });
 	});
 });
