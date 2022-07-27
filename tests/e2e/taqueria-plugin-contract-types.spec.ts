@@ -75,13 +75,15 @@ describe('E2E Testing for taqueria contract types plugin with ligo', () => {
 		try {
 			await exec(`taq -p ${taqueriaProjectPath}`);
 		} catch (_) {}
+
+		await exec(`cp e2e/data/increment.jsligo ${taqueriaProjectPath}/contracts`);
+		await exec(`taq add-contract increment.jsligo`, { cwd: `./${taqueriaProjectPath}` });
 	});
 
 	test.skip('Verify that taqueria contract types plugin can compile one contract and generate types', async () => {
 		const pwdPromise = await exec(`pwd`);
 		const pwd = pwdPromise.stdout.trim();
 
-		await exec(`cp e2e/data/increment.jsligo ${taqueriaProjectPath}/contracts`);
 		await exec(`taq compile`, { cwd: `${taqueriaProjectPath}` });
 
 		const generateTypesOutput = await exec(`taq generate types`, { cwd: `${taqueriaProjectPath}` });
@@ -113,7 +115,6 @@ describe('E2E Testing for taqueria contract types plugin with ligo', () => {
 		const pwd = pwdPromise.stdout.trim();
 		const folderName = 'otherFolder';
 
-		await exec(`cp e2e/data/increment.jsligo ${taqueriaProjectPath}/contracts`);
 		await exec(`taq compile`, { cwd: `${taqueriaProjectPath}` });
 
 		const generateTypesOutput = await exec(`taq generate types ${folderName}`, { cwd: `${taqueriaProjectPath}` });
@@ -137,8 +138,9 @@ describe('E2E Testing for taqueria contract types plugin with ligo', () => {
 		const pwdPromise = await exec(`pwd`);
 		const pwd = pwdPromise.stdout.trim();
 
-		await exec(`cp e2e/data/increment.jsligo ${taqueriaProjectPath}/contracts`);
 		await exec(`cp e2e/data/hello-tacos.mligo ${taqueriaProjectPath}/contracts`);
+		await exec(`taq add-contract hello-tacos.mligo`, { cwd: `./${taqueriaProjectPath}` });
+
 		await exec(`taq compile`, { cwd: `${taqueriaProjectPath}` });
 
 		const generateTypesOutput = await exec(`taq generate types`, { cwd: `${taqueriaProjectPath}` });

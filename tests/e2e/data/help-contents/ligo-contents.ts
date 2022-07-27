@@ -41,26 +41,19 @@ Options:
   -i, --infer       Enable type inference
 `;
 
-export const ligoNoContracts = `
-┌────────────┬──────────┐
-│ Contract   │ Artifact │
-├────────────┼──────────┤
-│ None found │ N/A      │
-└────────────┴──────────┘
-`.trimStart();
+export const ligoNoContracts = `No contracts found to compile. Have you run "taq add-contract [sourceFile]" ?
+`;
 
-export const compileNonExistent = `
-┌────────────┬──────────────┐
+export const compileNonExistent = `┌────────────┬──────────────┐
 │ Contract   │ Artifact     │
 ├────────────┼──────────────┤
 │ test.mligo │ Not compiled │
 └────────────┴──────────────┘
-`.trimStart();
+`;
 
-export const compileInvalid = `
-┌────────────────────────┬──────────────┐
+export const compileInvalid = `┌────────────────────────┬──────────────┐
 │ Contract               │ Artifact     │
 ├────────────────────────┼──────────────┤
 │ invalid-contract.mligo │ Not compiled │
 └────────────────────────┴──────────────┘
-`.trimStart();
+`;

@@ -36,8 +36,6 @@ describe('E2E Testing for taqueria taquito plugin', () => {
 		// 1. Run taq deploy on a selected test network described in "test" environment
 		const deployCommand = await exec(`taq deploy -e ${environment}`, { cwd: `./${taqueriaProjectPath}` });
 		const deployResponse = deployCommand.stdout.trim().split(/\r?\n/)[3];
-		console.log(deployCommand);
-		console.log(deployResponse);
 
 		// 2. Verify that contract has been originated on the network
 		expect(deployResponse).toContain('hello-tacos.tz');
@@ -144,8 +142,6 @@ describe('E2E Testing for taqueria taquito plugin', () => {
 			cwd: `./${taqueriaProjectPath}`,
 		});
 		const deployResponse = deployCommand.stdout.trim().split(/\r?\n/)[3];
-		console.log(deployCommand);
-		console.log(deployResponse);
 
 		// 2. Get the KT address from the output
 		expect(deployResponse).toContain('all-types.tz');
