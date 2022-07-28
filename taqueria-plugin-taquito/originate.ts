@@ -134,7 +134,19 @@ const createBatch = async (parsedArgs: Opts, tezos: TezosToolkit, destination: s
 		return await mapOpToContract(contracts, op, destination);
 	} catch (err) {
 		const error = (err as { message: string });
-		if (error.message) sendErr(error.message);
+		if (error.message) {
+			const msg = error.message;
+			if (/ENOTFOUND/.test(msg)) {
+				sendErr(msg + ' - The RPC URL may be invalid. Check your ./taq/config.json.');
+			} else if (/ECONNREFUSED/.test(msg)) {
+				sendErr(msg + ' - The RPC URL may be down or the sandbox is not running.');
+			} else {
+				sendErr(
+					msg
+						+ " - There was a problem communicating with the chain. Perhaps review your RPC URL of the network or sandbox you're targeting.",
+				);
+			}
+		}
 		return undefined;
 	}
 };

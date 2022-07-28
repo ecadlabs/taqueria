@@ -105,6 +105,7 @@ export const installPlugin = (projectDir: SanitizedAbsPath.t, i18n: i18n, plugin
 			// what the real package name is
 			return addToPluginList(pluginName, config);
 		}),
+		map(_ => Deno.run({ cmd: ['sh', '-c', 'taq'], cwd: projectDir, stdout: 'piped', stderr: 'piped' })), // temp hack for #528
 		map(_ => i18n.__('pluginInstalled')),
 	);
 
@@ -125,5 +126,6 @@ export const uninstallPlugin = (projectDir: SanitizedAbsPath.t, i18n: i18n, plug
 				chain(writeJsonFile(config.configFile)),
 			);
 		}),
+		map(_ => Deno.run({ cmd: ['sh', '-c', 'taq'], cwd: projectDir, stdout: 'piped', stderr: 'piped' })), // temp hack for #528
 		map(() => i18n.__('pluginUninstalled')),
 	);
