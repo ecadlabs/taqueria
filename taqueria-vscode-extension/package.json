@@ -121,6 +121,11 @@
 					"contextualTitle": "Contracts"
 				},
 				{
+					"id": "taqueria-artifacts",
+					"name": "Artifacts",
+					"contextualTitle": "Artifacts"
+				},
+				{
 					"id": "taqueria-environments",
 					"name": "Environments",
 					"contextualTitle": "Environments"
@@ -293,7 +298,7 @@
 				},
 				{
 					"command": "taqueria.originate",
-					"when": "view == taqueria-environments || view == taqueria-contracts",
+					"when": "view == taqueria-environments || view == taqueria-artifacts",
 					"group": "inline"
 				},
 				{

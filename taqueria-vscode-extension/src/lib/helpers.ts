@@ -5,6 +5,7 @@ import { readFile } from 'fs/promises';
 import { stat } from 'fs/promises';
 import path, { join } from 'path';
 import * as api from 'vscode';
+import { ArtifactsDataProvider } from './gui/ArtifactsDataProvider';
 import { ContractTreeItem } from './gui/ContractsDataProvider';
 import { ContractsDataProvider } from './gui/ContractsDataProvider';
 import { EnvironmentTreeItem } from './gui/EnvironmentsDataProvider';
@@ -483,10 +484,10 @@ export class VsCodeHelper {
 			let fileName: string | undefined = undefined;
 			if (arg) {
 				if (arg instanceof EnvironmentTreeItem) {
-					environmentName = (arg as EnvironmentTreeItem).label;
+					environmentName = arg.label;
 				}
 				if (arg instanceof ContractTreeItem) {
-					fileName = this.getContractFileName((arg as ContractTreeItem).fileName);
+					fileName = this.getContractFileName(arg.fileName);
 				}
 			}
 			if (!environmentName) {
@@ -877,6 +878,9 @@ export class VsCodeHelper {
 				const contractsFolderWatcher = this.vscode.workspace.createFileSystemWatcher(join(projectDir, 'contracts'));
 				const contractsWatcher = this.vscode.workspace.createFileSystemWatcher(join(projectDir, 'contracts/*'));
 
+				const artifactsFolderWatcher = this.vscode.workspace.createFileSystemWatcher(join(projectDir, 'artifacts'));
+				const artifactsWatcher = this.vscode.workspace.createFileSystemWatcher(join(projectDir, 'artifacts/*'));
+
 				// TODO: Is passing these arguments to the callback of a long lived watcher prevent GC? Are these short lived objects?
 				folderWatcher.onDidChange((e: api.Uri) => this.updateCommandStates(projectDir));
 				folderWatcher.onDidCreate((e: api.Uri) => this.updateCommandStates(projectDir));
@@ -897,6 +901,13 @@ export class VsCodeHelper {
 				contractsWatcher.onDidCreate(_ => this.contractsDataProvider?.refresh());
 				contractsWatcher.onDidDelete(_ => this.contractsDataProvider?.refresh());
 
+				artifactsFolderWatcher.onDidChange(_ => this.artifactsDataProvider?.refresh());
+				artifactsFolderWatcher.onDidCreate(_ => this.artifactsDataProvider?.refresh());
+				artifactsFolderWatcher.onDidDelete(_ => this.artifactsDataProvider?.refresh());
+				artifactsWatcher.onDidChange(_ => this.artifactsDataProvider?.refresh());
+				artifactsWatcher.onDidCreate(_ => this.artifactsDataProvider?.refresh());
+				artifactsWatcher.onDidDelete(_ => this.artifactsDataProvider?.refresh());
+
 				return [folderWatcher, configWatcher, stateWatcher, contractsFolderWatcher, contractsWatcher];
 			} catch (error: unknown) {
 				throw {
@@ -911,6 +922,7 @@ export class VsCodeHelper {
 
 	private dataProviders: { refresh: () => void }[] = [];
 	private contractsDataProvider?: ContractsDataProvider;
+	private artifactsDataProvider?: ArtifactsDataProvider;
 	private sandboxesDataProvider?: SandboxesDataProvider;
 
 	registerDataProviders(workspaceFolder: string) {
@@ -923,6 +935,10 @@ export class VsCodeHelper {
 		this.contractsDataProvider = this.registerDataProvider(
 			'taqueria-contracts',
 			new ContractsDataProvider(workspaceFolder, this),
+		);
+		this.artifactsDataProvider = this.registerDataProvider(
+			'taqueria-artifacts',
+			new ArtifactsDataProvider(workspaceFolder, this),
 		);
 	}
 
