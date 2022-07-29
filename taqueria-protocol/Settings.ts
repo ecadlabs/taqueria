@@ -6,7 +6,7 @@ export const rawSchema = z.object({
 		[z.literal('opt_in'), z.literal('opt_out')],
 		{ description: 'Consent' },
 	),
-}).describe('Setting');
+}).strict().describe('Setting');
 
 type RawInput = z.infer<typeof rawSchema>;
 

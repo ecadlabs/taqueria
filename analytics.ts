@@ -1,13 +1,12 @@
 import * as Settings from '@taqueria/protocol/Settings';
 import * as TaqError from '@taqueria/protocol/TaqError';
-import { attemptP, chain, chainRej, FutureInstance as Future, map, mapRej, resolve } from 'fluture';
+import { attemptP, chain, chainRej, FutureInstance as Future, map, mapRej, reject, resolve } from 'fluture';
 import { pipe } from 'https://deno.land/x/fun@v1.0.0/fns.ts';
 import { getMachineId } from 'https://deno.land/x/machine_id@v0.3.0/mod.ts';
 import type { UsageAnalyticsDeps } from './taqueria-types.ts';
 import * as utils from './taqueria-utils/taqueria-utils.ts';
 
 const {
-	mkdir,
 	doesPathExist,
 	readJsonFile,
 	writeJsonFile,
@@ -21,8 +20,8 @@ type Consent = 'opt_in' | 'opt_out';
 
 const consentPrompt =
 	'Help improve Taqueria by sharing anonymous usage statistics in accordance with the privacy policy? (Y/n)';
-const optInConfirmationPrompt = consentPrompt;
-const optOutConfirmationPrompt = 'Are you sure you want to turn off usage statistic reporting? (Y/n)';
+// const optInConfirmationPrompt = consentPrompt;
+// const optOutConfirmationPrompt = 'Are you sure you want to turn off usage statistic reporting? (Y/n)';
 
 const OPT_IN = 'opt_in';
 const OPT_OUT = 'opt_out';
@@ -35,8 +34,8 @@ export const inject = (deps: UsageAnalyticsDeps) => {
 
 	const didUserChooseYes = (input: string | null) => input === null || /^y(es)?$/i.test(input);
 
-	const optInAnalyticsFirstTime = () => createSettingsFileWithConsent(OPT_IN);
-	const optOutAnalyticsFirstTime = () => createSettingsFileWithConsent(OPT_OUT);
+	// const optInAnalyticsFirstTime = () => createSettingsFileWithConsent(OPT_IN);
+	// const optOutAnalyticsFirstTime = () => createSettingsFileWithConsent(OPT_OUT);
 	const createSettingsFileWithConsent = (option: Consent) =>
 		pipe(
 			Settings.make({ consent: option }),
@@ -45,66 +44,75 @@ export const inject = (deps: UsageAnalyticsDeps) => {
 
 	const optInAnalytics = () => writeConsentValueToSettings(OPT_IN);
 	const optOutAnalytics = () => writeConsentValueToSettings(OPT_OUT);
-	const writeConsentValueToSettings = (option: Consent) =>
+	const writeConsentValueToSettings = (option: Consent): Future<TaqError.t, string> =>
 		pipe(
 			doesPathExist(settingsFilePath),
-			chain(() => {
-				const input = prompt(option === OPT_IN ? optInConfirmationPrompt : optOutConfirmationPrompt);
-				if (didUserChooseYes(input)) {
-					return pipe(
-						readJsonFile<Settings.t>(settingsFilePath),
-						map((settingsContent: Settings.t) => {
-							settingsContent.consent = option;
-							return settingsContent;
-						}),
-						chain(writeJsonFile(settingsFilePath)),
-						map(() =>
-							option === OPT_IN
-								? 'You have successfully opted-in to sharing anonymous usage analytics'
-								: 'You have successfully opted-out from sharing anonymous usage analytics'
-						),
-					);
-				} else {
-					return taqResolve('');
-				}
+			chain(() => readJsonFile<Settings.t>(settingsFilePath)),
+			chain(Settings.of),
+			chain((settingsContent: Settings.t) => {
+				const updatedSettingsContent = {
+					...settingsContent,
+					consent: option,
+				};
+				return Settings.of(updatedSettingsContent);
 			}),
-			mapRej(() =>
+			chain(writeJsonFile(settingsFilePath)),
+			chainRej(() => createSettingsFileWithConsent(option)),
+			map(() =>
 				option === OPT_IN
-					? 'The command "taq opt-in" is ignored as this might be the first time running Taqueria...'
-					: 'The command "taq opt-out" is ignored as this might be the first time running Taqueria...'
+					? 'You have successfully opted-in to sharing anonymous usage analytics'
+					: 'You have successfully opted-out from sharing anonymous usage analytics'
 			),
+			// mapRej((previous) => TaqError.create({
+			// 	kind: 'E_INTERNAL_LOGICAL_VALIDATION_FAILURE',
+			// 	msg: 'Error validating settings file',
+			// 	previous,
+			// })),
 		);
 
 	const isCIRun = () => env.get('CI') !== undefined;
 
 	const isTestRun = () => env.get('TEST') !== undefined;
 
+	const getTaqUI = () => inputArgs.includes('--fromVsCode') ? 'VSCode' : 'CLI';
+
+	const isNonTrackingRun = () =>
+		isCIRun()
+		|| isTestRun()
+		|| inputArgs.includes('--version')
+		|| inputArgs.includes('--build')
+		|| inputArgs.includes('testFromVsCode');
+
 	const promptForConsent = (): Future<TaqError.t, string> => {
+		if (isNonTrackingRun() || inputArgs.includes('opt-in') || inputArgs.includes('opt-out')) {
+			return taqResolve('');
+		} else if (getTaqUI() === 'VSCode') {
+			return reject({
+				kind: 'E_REQUEST_CONSENT_PROMPT_FROM_VSCODE',
+				msg: 'Request consent prompt from VSCode',
+			});
+		}
 		const input = prompt(consentPrompt);
-		const consentOption = didUserChooseYes(input) ? optInAnalyticsFirstTime : optOutAnalyticsFirstTime;
-		return pipe(
-			mkdir(settingsFolder),
-			chain(() => consentOption()),
-		);
+		return didUserChooseYes(input) ? optInAnalytics() : optOutAnalytics();
 	};
 
+	const validateSettingsFile = () =>
+		pipe(
+			doesPathExist(settingsFilePath),
+			chain(() => readJsonFile<Settings.t>(settingsFilePath)),
+			chain(Settings.of),
+			chainRej(() => promptForConsent()),
+		);
+
 	const allowTracking = (): Future<TaqError.t, boolean> => {
-		if (
-			isCIRun()
-			|| isTestRun()
-			|| inputArgs.includes('--version')
-			|| inputArgs.includes('--build')
-			|| inputArgs.includes('testFromVsCode')
-		) {
-			return taqResolve(false);
-		}
+		if (isNonTrackingRun()) return taqResolve(false);
 		return pipe(
 			// If path/file exists,
 			// then the key 'consent' will be present because this is the 1st iteration of the settings file,
 			// and the taq settings directory in home will exist as well.
-			doesPathExist(settingsFilePath),
-			chainRej(() => promptForConsent()),
-			chain(() => readJsonFile<Settings.t>(settingsFilePath)),
+			// doesPathExist(settingsFilePath),
+			// chainRej(() => promptForConsent()),
+			readJsonFile<Settings.t>(settingsFilePath),
 			map((settings: Settings.t) => settings.consent === OPT_IN),
 		);
 	};
@@ -118,7 +126,7 @@ export const inject = (deps: UsageAnalyticsDeps) => {
 		taq_version: string,
 		taqError: boolean,
 	): Future<TaqError.t, void> => {
-		const taq_ui = inputArgs.includes('--fromVsCode') ? 'VSCode' : 'CLI';
+		const taq_ui = getTaqUI();
 		if (taq_ui === 'VSCode') return resolve(noop()); // Disable for VSCode for now
 		return pipe(
 			allowTracking(),
@@ -163,10 +171,12 @@ export const inject = (deps: UsageAnalyticsDeps) => {
 					),
 				);
 			}),
+			chainRej(() => resolve(noop())),
 		);
 	};
 
 	return {
+		validateSettingsFile,
 		optInAnalytics,
 		optOutAnalytics,
 		sendEvent,

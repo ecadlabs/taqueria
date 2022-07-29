@@ -23,6 +23,7 @@ export type ErrorType =
 	| 'E_CONTRACT_NOT_REGISTERED'
 	| 'E_NO_PROVISIONS'
 	| 'E_INTERNAL_LOGICAL_VALIDATION_FAILURE'
+	| 'E_REQUEST_CONSENT_PROMPT_FROM_VSCODE'
 	| 'E_EXEC';
 
 export interface TaqError {
