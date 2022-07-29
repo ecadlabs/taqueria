@@ -61,6 +61,34 @@ const sidebars = {
         "plugins/plugin-tezos-client",
       ],
     },
+    {
+      type: "category",
+      label: "Task Reference",
+      className: "sidebarHeader",
+      collapsed: false,
+      collapsible: false,
+      items: [
+        "tasks/add-contract",
+        "tasks/compile",
+        "tasks/generate-types",
+        "tasks/init",
+        "tasks/install",
+        "tasks/list-accounts",
+        "tasks/list-contracts",
+        "tasks/opt-in",
+        "tasks/opt-out",
+        "tasks/originate",
+        "tasks/publish",
+        "tasks/remove-contract",
+        "tasks/scaffold",
+        "tasks/simulate",
+        "tasks/start-sandbox",
+        "tasks/stop-sandbox",
+        "tasks/test",
+        "tasks/typecheck",
+        "tasks/uninstall"
+      ],
+    },
     // {
     //   type: "category",
     //   label: "Taqueria Libraries",
@@ -93,16 +121,6 @@ const sidebars = {
         "tutorials/hello-tacos-tutorial"
       ],
     },
-    {
-      type: "category",
-      label: "Features",
-      className: "sidebarHeader",
-      collapsed: false,
-      collapsible: false,
-      items: [
-        "features/github-action"
-      ],
-    }, 
     {
       type: "category",
       label: "Taqueria Internals",
