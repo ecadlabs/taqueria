@@ -5,7 +5,7 @@ import { readFile } from 'fs/promises';
 import { stat } from 'fs/promises';
 import path, { join } from 'path';
 import * as api from 'vscode';
-import { ArtifactsDataProvider } from './gui/ArtifactsDataProvider';
+import { ArtifactsDataProvider, ArtifactTreeItem } from './gui/ArtifactsDataProvider';
 import { ContractTreeItem } from './gui/ContractsDataProvider';
 import { ContractsDataProvider } from './gui/ContractsDataProvider';
 import { EnvironmentTreeItem } from './gui/EnvironmentsDataProvider';
@@ -470,12 +470,12 @@ export class VsCodeHelper {
 		});
 	}
 
-	getContractFileName(fileName: string) {
+	getArtifactFileNameFromContract(fileName: string) {
 		return fileName.replace(/\.[^/.]+$/, '') + '.tz';
 	}
 
 	async exposeOriginateTask() {
-		this.registerCommand(Commands.originate, async (arg?: ContractTreeItem | EnvironmentTreeItem | undefined) => {
+		this.registerCommand(Commands.originate, async (arg?: ArtifactTreeItem | EnvironmentTreeItem | undefined) => {
 			const projectDir = await this.getFolderForTasksOnTaqifiedFolders('install');
 			if (projectDir === undefined) {
 				return;
@@ -486,8 +486,8 @@ export class VsCodeHelper {
 				if (arg instanceof EnvironmentTreeItem) {
 					environmentName = arg.label;
 				}
-				if (arg instanceof ContractTreeItem) {
-					fileName = this.getContractFileName(arg.fileName);
+				if (arg instanceof ArtifactTreeItem) {
+					fileName = arg.fileName;
 				}
 			}
 			if (!environmentName) {
@@ -599,10 +599,10 @@ export class VsCodeHelper {
 			let sandboxName: string | undefined = undefined;
 			if (arg) {
 				if (arg instanceof SandboxTreeItem) {
-					sandboxName = (arg as SandboxTreeItem).label;
+					sandboxName = arg.label;
 				}
 				if (arg instanceof ContractTreeItem) {
-					fileName = this.getContractFileName((arg as ContractTreeItem).fileName);
+					fileName = this.getArtifactFileNameFromContract(arg.fileName);
 				}
 			}
 			if (!sandboxName) {
